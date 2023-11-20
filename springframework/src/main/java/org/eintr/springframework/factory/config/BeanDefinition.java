@@ -1,6 +1,6 @@
 package org.eintr.springframework.factory.config;
 
-import org.eintr.springframework.factory.PropertyValues;
+import org.eintr.springframework.PropertyValues;
 
 public class BeanDefinition {
 	private Class beanClass;

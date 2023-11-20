@@ -1,4 +1,4 @@
-package org.eintr.springframework.factory;
+package org.eintr.springframework;
 
 // bean 属性信息
 public class PropertyValue {
