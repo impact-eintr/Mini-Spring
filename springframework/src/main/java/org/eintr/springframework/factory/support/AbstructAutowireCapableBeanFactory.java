@@ -33,8 +33,19 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 		for (Constructor ctor : declaredConstructors) {
 			if (null != args && ctor.getParameterTypes().length == args.length) {
 				// TODO 处理一下不同类型
-				constructorToUse = ctor;
-				break;
+				int i = 0;
+				boolean flag = true;
+				for (Class<?> clazz : ctor.getParameterTypes()) { // FIXME 处理自动装箱
+					if (!args[i].getClass().equals(clazz)) {
+						flag = false;
+						break;
+					}
+					i++;
+				}
+				if (flag) {
+					constructorToUse = ctor;
+					break;
+				}
 			}
 		}
 		return getInstantiationStrategy().instantiate(beanDefinition, beanName, constructorToUse, args);
