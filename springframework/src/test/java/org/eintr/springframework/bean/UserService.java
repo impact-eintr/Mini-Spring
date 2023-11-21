@@ -1,14 +1,16 @@
 package org.eintr.springframework.bean;
 
-import java.util.WeakHashMap;
-
 public class UserService {
+	String name;
+	Integer i;
 	public UserService(String name) {
+		this.name = name;
 		System.out.println("this is "+name);
 	}
 
 
 	public UserService(Integer i) {
+		this.i = i;
 		System.out.println("this is "+i);
 	}
 
@@ -16,4 +18,7 @@ public class UserService {
 		System.out.println("查询用户信息");
 	}
 
+	public String toString() {
+		return name + "  "+i;
+	}
 }

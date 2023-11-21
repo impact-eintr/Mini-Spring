@@ -17,6 +17,7 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 		Object bean;
 		try {
 			bean = createBeanInstance(beanDefinition, beanName, args);
+			applyPropertyValues(beanName, bean, beanDefinition);
 		} catch (Exception e) {
 			throw new BeansException("Instantiation of bean failed", e);
 		}
@@ -30,24 +31,23 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 		Constructor constructorToUse = null;
 		Class<?> beanClass = beanDefinition.getBeanClass();
 		Constructor<?>[] declaredConstructors = beanClass.getDeclaredConstructors();
-		for (Constructor ctor : declaredConstructors) {
-			if (null != args && ctor.getParameterTypes().length == args.length) {
-				// TODO 处理一下不同类型
-				int i = 0;
-				boolean flag = true;
-				for (Class<?> clazz : ctor.getParameterTypes()) { // FIXME 处理自动装箱
-					if (!args[i].getClass().equals(clazz)) {
-						flag = false;
-						break;
-					}
-					i++;
-				}
-				if (flag) {
-					constructorToUse = ctor;
-					break;
-				}
-			}
-		}
+		for (Constructor ctor : declaredConstructors)
+            if (null != args && ctor.getParameterTypes().length == args.length) {
+                // TODO 处理一下不同类型
+                int i = 0;
+                boolean flag = true;
+                for (Class<?> clazz : ctor.getParameterTypes()) { // FIXME 处理自动装箱
+                    if (!args[i].getClass().equals(clazz)) {
+                        flag = false;
+                        break;
+                    }
+                    i++;
+                }
+                if (flag) {
+                    constructorToUse = ctor;
+                    break;
+                }
+            }
 		return getInstantiationStrategy().instantiate(beanDefinition, beanName, constructorToUse, args);
 	}
 

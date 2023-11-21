@@ -8,14 +8,17 @@ public class ApiTest {
 	@Test
 	public void test_BeanFactory() {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
-		beanFactory.registerBeanDefinition("userservice", new BeanDefinition(UserService.class));
 
-		UserService userService = (UserService) beanFactory.getBean("userservice", new Integer(1));
+		PropertyValues propertyValues = new PropertyValues();
+		propertyValues.addPropertyValue(new PropertyValue("name", "aaa"));
+		propertyValues.addPropertyValue(new PropertyValue("i", 100));
+		BeanDefinition beanDefinition = new BeanDefinition(UserService.class, propertyValues);
+		beanFactory.registerBeanDefinition("userservice", beanDefinition);
+
+		UserService userService = (UserService) beanFactory.getBean("userservice", 1);
 		userService.queryUserInfo();
 
-		userService = (UserService) beanFactory.getBean("userservice", "EINTR");
-		userService.queryUserInfo();
-
+		System.out.println(userService);
 
 		UserService userService_s = (UserService) beanFactory.getSingleton("userservice");
 		userService_s.queryUserInfo();
