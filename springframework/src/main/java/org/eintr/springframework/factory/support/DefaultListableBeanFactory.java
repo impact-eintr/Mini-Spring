@@ -8,7 +8,7 @@ import org.eintr.springframework.factory.config.BeanDefinition;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DefaultListableBeanFactory extends AbstructAutowireCapableBeanFactory implements BeanDefinitionRegistry{
+public class DefaultListableBeanFactory extends AbstructAutowireCapableBeanFactory implements BeanDefinitionRegistry, ConfigureListableBeanFactory{
 	private final Map<String, BeanDefinition> beanDefinitionMap = new HashMap<>();
 
 	// 注册一个BeanDefinition
@@ -35,6 +35,16 @@ public class DefaultListableBeanFactory extends AbstructAutowireCapableBeanFacto
 		return beanDefinitionMap.keySet().toArray(new String[0]);
 	}
 
-	//TODO 可配置的工厂函数的接口实现
+	@Override
+	public <T> Map<String, T> getBeansOfType(Class<T> type) throws BeansException {
+		Map<String, T> result = new HashMap<>();
+		beanDefinitionMap.forEach((beanName, beanDefinition)->{
+			Class beanClass = beanDefinition.getBeanClass();
+			if (type.isAssignableFrom(beanClass)) {
+				result.put(beanName, (T)getBean(beanName));
+			}
+		});
+		return null;
+	}
 
 }

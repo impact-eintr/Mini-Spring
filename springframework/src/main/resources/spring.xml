@@ -1,7 +1,7 @@
 <beans>
     <bean id="userDao" class="org.eintr.springframework.test.bean.UserDao"/>
     <bean id="userService" class="org.eintr.springframework.test.bean.UserService">
-        <propery name="uId" value="11111"/>
-        <propery name="userDao" ref="userDao"/>
+        <property name="uId" value="1000"/>
+        <property name="userDao" ref="userDao"/>
     </bean>
 </beans>

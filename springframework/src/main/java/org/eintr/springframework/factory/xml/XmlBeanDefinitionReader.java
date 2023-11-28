@@ -27,7 +27,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		super(registry, resourceLoader);
 	}
 
-	public void loadBeanDefinition(Resource resource) throws BeansException {
+	public void loadBeanDefinitions(Resource resource) throws BeansException {
 		try (InputStream inputStream = resource.getInputStream()) {
 			doLoadBeanDenifitions(inputStream);
 		} catch (IOException | ClassNotFoundException e) {
@@ -35,16 +35,16 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		}
 	}
 
-	public void loadBeanDefinition(Resource... resources) throws BeansException {
+	public void loadBeanDefinitions(Resource... resources) throws BeansException {
 		for (Resource resource : resources) {
-			loadBeanDefinition(resource);
+			loadBeanDefinitions(resource);
 		}
 	}
 
-	public void loadBeanDefinition(String location) throws BeansException {
+	public void loadBeanDefinitions(String location) throws BeansException {
 		ResourceLoader resourceLoader = getResourceLoader();
 		Resource resource = resourceLoader.getResource(location);
-		loadBeanDefinition(resource);
+		loadBeanDefinitions(resource);
 	}
 
 	// 根据 spring.xml 配置 BeanDefinition
@@ -80,16 +80,16 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 			// 读取属性并填充
 			for (int j = 0;j < bean.getChildNodes().getLength();j++) {
-				if (!(bean.getChildNodes().item(i) instanceof Element)) { // 判断的元素
+				if (!(bean.getChildNodes().item(j) instanceof Element)) { // 判断的元素
 					continue;
 				}
-				if (!"property".equals(bean.getChildNodes().item(i).getNodeName())) { // 跳过不是bean的标签
+				if (!"property".equals(bean.getChildNodes().item(j).getNodeName())) {
 					continue;
 				}
-				Element property = (Element)  bean.getChildNodes().item(i);
-				String attrName = bean.getAttribute("name");
-				String attrValue = bean.getAttribute("value");
-				String attrRef = bean.getAttribute("ref");
+				Element property = (Element)  bean.getChildNodes().item(j);
+				String attrName = property.getAttribute("name");
+				String attrValue = property.getAttribute("value");
+				String attrRef = property.getAttribute("ref");
 				// 获取属性值：引入对象 值对象
 				Object value = StrUtil.isNotEmpty(attrRef) ? new BeanReference(attrRef) : attrValue;
 				// 创建属性信息

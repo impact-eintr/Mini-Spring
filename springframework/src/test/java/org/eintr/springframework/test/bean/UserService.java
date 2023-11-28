@@ -3,7 +3,7 @@ package org.eintr.springframework.test.bean;
 public class UserService {
 	private String uId;
 
-	private UserDao userDao;
+	public UserDao userDao;
 
 	public String queryUserInfo() {
 		return userDao.queryUserName(uId);

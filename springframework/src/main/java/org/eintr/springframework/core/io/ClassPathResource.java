@@ -22,7 +22,7 @@ public class ClassPathResource implements Resource {
     public InputStream getInputStream() throws IOException {
         InputStream is = classLoader.getResourceAsStream(path);
         if (is == null) {
-            throw new FileNotFoundException(this.path + "can mot find");
+            throw new FileNotFoundException(this.path + "can not find");
         }
         return is;
     }
