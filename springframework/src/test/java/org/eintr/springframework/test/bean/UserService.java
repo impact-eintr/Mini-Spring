@@ -2,7 +2,7 @@ package org.eintr.springframework.test.bean;
 
 public class UserService {
 	private String uId;
-
+	private String location;
 	public UserDao userDao;
 
 	public String queryUserInfo() {
@@ -23,5 +23,13 @@ public class UserService {
 
 	public void setUserDao(UserDao userDao) {
 		this.userDao = userDao;
+	}
+
+	public String getLocation() {
+		return location;
+	}
+
+	public void setLocation(String location) {
+		this.location = location;
 	}
 }
