@@ -19,8 +19,11 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 		Object bean;
 		try {
 			bean = createBeanInstance(beanDefinition, beanName, args);
-			applyPropertyValues(beanName, bean, beanDefinition);
+			applyPropertyValues(beanName, bean, beanDefinition); // 这里还是Beanfinitiong保存好的初始信息
+			// 执行bean的初始化函数
+			bean = initializeBean(beanName, bean, beanDefinition); // 这里已经是经过类实例后处理后的数据
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new BeansException("Instantiation of bean failed", e);
 		}
 
@@ -54,7 +57,7 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 	}
 
 
-	// Bean属性填充
+	// Bean属性填充 使用定义好的Beanfinition
 	protected void applyPropertyValues(String beanName, Object bean, BeanDefinition beanDefinition) {
 		try {
 			PropertyValues propertyValues = beanDefinition.getPropertyValues();
@@ -71,6 +74,7 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 			}
 
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new BeansException("Error setting property values: "+beanName);
 		}
 	}
@@ -83,12 +87,24 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 		this.instantiationStrategy = instantiationStrategy;
 	}
 
+	private Object initializeBean(String beanName, Object bean, BeanDefinition beanDefinition) {
+		Object wrappedBean = applyBeanPostProcessorsBeforeInitialization(bean, beanName);
+		initializeMethods(beanName, wrappedBean, beanDefinition);
+		wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
+		return wrappedBean;
+	}
 
+	private void initializeMethods(String beanName, Object bean, BeanDefinition beanDefinition) {
+		// TODO do something
+	}
 
 	public Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, String beanName) throws BeansException {
 		Object result = existingBean;
 		for (BeanPostProcessor processor : getBeanPostProcessors()) {
-
+			Object current =processor.postProcessBeforeInitialization(result, beanName);
+			if (null == current) // 到了链表的结尾
+				return result;
+			result = current;
 		}
 		return result;
 	}
@@ -97,8 +113,10 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 	public Object applyBeanPostProcessorsAfterInitialization(Object existingBean, String beanName) throws BeansException {
 		Object result = existingBean;
 		for (BeanPostProcessor processor : getBeanPostProcessors()) {
-			Object current = processor.postProcessBeforeInitialization(result, beanName);
-			if ()
+			Object current =processor.postProcessAfterInitialization(result, beanName);
+			if (null == current)
+				return result;
+			result = current;
 		}
 		return result;
 	}

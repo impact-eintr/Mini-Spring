@@ -47,6 +47,12 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		loadBeanDefinitions(resource);
 	}
 
+	public void loadBeanDefinitions(String... locations) throws BeansException {
+		for (String location : locations) {
+			loadBeanDefinitions(location);
+		}
+	}
+
 	// 根据 spring.xml 配置 BeanDefinition
 	protected void doLoadBeanDenifitions(InputStream inputStream) throws ClassNotFoundException {
 		Document doc = XmlUtil.readXML(inputStream);

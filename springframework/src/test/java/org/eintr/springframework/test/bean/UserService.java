@@ -5,6 +5,8 @@ public class UserService {
 	private String location;
 	public UserDao userDao;
 
+	public String Language;
+
 	public String queryUserInfo() {
 		return userDao.queryUserName(uId);
 	}
@@ -31,5 +33,13 @@ public class UserService {
 
 	public void setLocation(String location) {
 		this.location = location;
+	}
+
+	public String getLanguage() {
+		return Language;
+	}
+
+	public void setLanguage(String language) {
+		Language = language;
 	}
 }

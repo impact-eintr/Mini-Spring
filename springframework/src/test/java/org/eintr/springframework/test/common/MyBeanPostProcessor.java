@@ -9,7 +9,7 @@ public class MyBeanPostProcessor implements BeanPostProcessor {
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
         if ("userService".equals(beanName)) {
             UserService userService = (UserService) bean;
-            userService.setLocation("在前处理中修改为 天津");
+            userService.setLocation("在类实例后处理中 天津");
         }
         return bean;
     }

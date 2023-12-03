@@ -3,5 +3,9 @@
     <bean id="userService" class="org.eintr.springframework.test.bean.UserService">
         <property name="uId" value="1000"/>
         <property name="userDao" ref="userDao"/>
+        <property name="Language" value="ENGLISH"/>
+        <property name="location" value="北京"/>
     </bean>
+    <bean class="org.eintr.springframework.test.common.MyBeanPostProcessor"/>
+    <bean class="org.eintr.springframework.test.common.MyBeanFactoryPostProcessor"/>
 </beans>

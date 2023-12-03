@@ -50,6 +50,6 @@ public class DefaultListableBeanFactory extends AbstructAutowireCapableBeanFacto
 				result.put(beanName, (T)getBean(beanName));
 			}
 		});
-		return null;
+		return result;
 	}
 }

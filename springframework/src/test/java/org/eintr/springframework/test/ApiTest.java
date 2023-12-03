@@ -3,6 +3,7 @@ package org.eintr.springframework.test;
 
 import org.eintr.springframework.beans.PropertyValue;
 import org.eintr.springframework.beans.PropertyValues;
+import org.eintr.springframework.context.support.ClassPathXmlApplicationContext;
 import org.eintr.springframework.core.io.DefaultResourceLoader;
 import org.eintr.springframework.core.io.Resource;
 import org.eintr.springframework.beans.factory.config.BeanReference;
@@ -43,22 +44,19 @@ public class ApiTest {
 		UserService userService = beanFactory.getBean("userService", UserService.class);
 		String result = userService.queryUserInfo();
 		System.out.println("测试结果：" + result);
-
 	}
 
 
 	@Test
 	public void test_xml() {
 		// 1.初始化 BeanFactory
-		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:spring.xml");
 
-		// 2. 读取配置文件&注册Bean
-		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
-		reader.loadBeanDefinitions("classpath:spring.xml");
-
-		// 3. 获取Bean对象调用方法
-		UserService userService = beanFactory.getBean("userService", UserService.class);
+		// 2. 获取Bean对象调用方法
+		UserService userService = applicationContext.getBean("userService", UserService.class);
 		String result = userService.queryUserInfo();
 		System.out.println("测试结果：" + result);
+		System.out.println(userService.getLanguage());
+		System.out.println(userService.getLocation());
 	}
 }

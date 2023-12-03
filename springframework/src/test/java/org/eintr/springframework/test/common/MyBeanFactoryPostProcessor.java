@@ -12,6 +12,7 @@ public class MyBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
         BeanDefinition beanDefinition = beanFactory.getBeanDefinition("userService");
         PropertyValues propertyValues = beanDefinition.getPropertyValues();
-        propertyValues.addPropertyValue(new PropertyValue("A", "这是BeanDefinition后处理添加的"));
+
+       // propertyValues.addPropertyValue(new PropertyValue("Language", "在类信息后处理中 CHINESE"));
     }
 }
