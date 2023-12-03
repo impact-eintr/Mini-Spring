@@ -1,6 +1,10 @@
 package org.eintr.springframework.test.bean;
 
-public class UserService {
+import org.eintr.springframework.beans.factory.DisposableBean;
+import org.eintr.springframework.beans.factory.InitializingBean;
+
+
+public class UserService implements InitializingBean, DisposableBean {
 	private String uId;
 	private String location;
 	public UserDao userDao;
@@ -41,5 +45,15 @@ public class UserService {
 
 	public void setLanguage(String language) {
 		Language = language;
+	}
+
+	@Override
+	public void destroy() throws Exception {
+		System.out.println("执行：UserService.destroy");
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		System.out.println("执行：UserService.afterPropertiesSet");
 	}
 }

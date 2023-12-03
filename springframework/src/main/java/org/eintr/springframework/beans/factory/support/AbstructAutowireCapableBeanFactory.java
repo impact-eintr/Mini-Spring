@@ -6,12 +6,14 @@ import org.eintr.springframework.beans.BeansException;
 import org.eintr.springframework.beans.PropertyValue;
 import org.eintr.springframework.beans.PropertyValues;
 import org.eintr.springframework.beans.factory.DisposableBean;
+import org.eintr.springframework.beans.factory.InitializingBean;
 import org.eintr.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.eintr.springframework.beans.factory.config.BeanDefinition;
 import org.eintr.springframework.beans.factory.config.BeanPostProcessor;
 import org.eintr.springframework.beans.factory.config.BeanReference;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 
 public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFactory implements AutowireCapableBeanFactory {
 
@@ -102,13 +104,35 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 
 	private Object initializeBean(String beanName, Object bean, BeanDefinition beanDefinition) {
 		Object wrappedBean = applyBeanPostProcessorsBeforeInitialization(bean, beanName);
-		initializeMethods(beanName, wrappedBean, beanDefinition);
+
+		try {
+			invokeInitMethods(beanName, wrappedBean, beanDefinition);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new BeansException("Invocation of init method of bean[" +
+					beanName + "] failed", e);
+		}
+
 		wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
 		return wrappedBean;
 	}
 
-	private void initializeMethods(String beanName, Object bean, BeanDefinition beanDefinition) {
-		// TODO do something
+	private void invokeInitMethods(String beanName, Object bean, BeanDefinition beanDefinition) throws Exception {
+		// 优先级： 实现了初始化接口 > 指定了初始化函数
+		// 1. 实现接口 InitializingBean
+		if (bean instanceof InitializingBean) {
+			((InitializingBean) bean).afterPropertiesSet();
+		}
+
+		// 2. 注解配置 init-method {判断是为了避免二次执行初始化}
+		String initMethodName = beanDefinition.getInitMethodName();
+		if (StrUtil.isNotEmpty(initMethodName) && !(bean instanceof InitializingBean)) {
+			Method initMethod = beanDefinition.getBeanClass().getMethod(initMethodName);
+			if (null == initMethod) {
+				throw new BeansException("Could not find an init method named '" + initMethodName + "' on bean with name '" + beanName + "'");
+			}
+			initMethod.invoke(bean);
+		}
 	}
 
 	public Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, String beanName) throws BeansException {
