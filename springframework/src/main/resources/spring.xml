@@ -1,6 +1,6 @@
 <beans>
     <bean id="userDao" class="org.eintr.springframework.test.bean.UserDao"/>
-    <bean id="userService" class="org.eintr.springframework.test.bean.UserService">
+    <bean id="userService" class="org.eintr.springframework.test.bean.UserService"  init-method="initDataMethod" destroy-method="destroyDataMethod">
         <property name="uId" value="1000"/>
         <property name="userDao" ref="userDao"/>
         <property name="Language" value="ENGLISH"/>

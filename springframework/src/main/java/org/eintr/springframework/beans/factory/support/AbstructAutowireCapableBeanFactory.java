@@ -1,9 +1,11 @@
 package org.eintr.springframework.beans.factory.support;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.StrUtil;
 import org.eintr.springframework.beans.BeansException;
 import org.eintr.springframework.beans.PropertyValue;
 import org.eintr.springframework.beans.PropertyValues;
+import org.eintr.springframework.beans.factory.DisposableBean;
 import org.eintr.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.eintr.springframework.beans.factory.config.BeanDefinition;
 import org.eintr.springframework.beans.factory.config.BeanPostProcessor;
@@ -27,9 +29,20 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 			throw new BeansException("Instantiation of bean failed", e);
 		}
 
+		registerDisposableBeanIfNecessary(beanName, bean, beanDefinition);
+
 		// 添加这个单例
 		addSingleton(beanName, bean);
 		return bean;
+	}
+
+	protected void registerDisposableBeanIfNecessary(String beanName, Object bean, BeanDefinition beanDefinition) {
+		if (bean instanceof DisposableBean ||
+				StrUtil.isNotEmpty(beanDefinition.getDestroyMethodName())) {
+			registerDisposableBean(beanName, new
+					DisposableBeanAdapter(bean, beanName, beanDefinition));
+		}
+
 	}
 
 	protected Object createBeanInstance(BeanDefinition beanDefinition, String beanName, Object[] args) {
