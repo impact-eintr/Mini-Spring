@@ -5,8 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import org.eintr.springframework.beans.BeansException;
 import org.eintr.springframework.beans.PropertyValue;
 import org.eintr.springframework.beans.PropertyValues;
-import org.eintr.springframework.beans.factory.DisposableBean;
-import org.eintr.springframework.beans.factory.InitializingBean;
+import org.eintr.springframework.beans.factory.*;
 import org.eintr.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.eintr.springframework.beans.factory.config.BeanDefinition;
 import org.eintr.springframework.beans.factory.config.BeanPostProcessor;
@@ -103,6 +102,17 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 	}
 
 	private Object initializeBean(String beanName, Object bean, BeanDefinition beanDefinition) {
+		if (bean instanceof Aware) {
+			if (bean instanceof BeanFactoryAware) {
+				((BeanFactoryAware) bean).setBeanFactory(this);
+			}
+			if (bean instanceof BeanClassLoaderAware) {
+				((BeanClassLoaderAware) bean).setBeanClassLoader(getBeanClassLoader());
+			}
+			if (bean instanceof BeanNameAware) {
+				((BeanNameAware) bean).setBeanName(beanName);
+			}
+		}
 		Object wrappedBean = applyBeanPostProcessorsBeforeInitialization(bean, beanName);
 
 		try {
@@ -121,6 +131,7 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 		// 优先级： 实现了初始化接口 > 指定了初始化函数
 		// 1. 实现接口 InitializingBean
 		if (bean instanceof InitializingBean) {
+			System.out.println(beanName+" 实例化调用(2): InitializingBean.afterPropertiesSet");
 			((InitializingBean) bean).afterPropertiesSet();
 		}
 
@@ -131,14 +142,21 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 			if (null == initMethod) {
 				throw new BeansException("Could not find an init method named '" + initMethodName + "' on bean with name '" + beanName + "'");
 			}
+			System.out.println(beanName+" 实例化调用(2): initMethod.invoke");
 			initMethod.invoke(bean);
+		}
+
+		if (!(bean instanceof InitializingBean) &&
+				!(StrUtil.isNotEmpty(initMethodName) && !(bean instanceof InitializingBean))) {
+			System.out.println(beanName+" 实例化调用(2): 无自定义初始化函数");
 		}
 	}
 
 	public Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, String beanName) throws BeansException {
+		System.out.println(beanName+" 实例化调用(1): processor.postProcessBeforeInitialization");
 		Object result = existingBean;
 		for (BeanPostProcessor processor : getBeanPostProcessors()) {
-			Object current =processor.postProcessBeforeInitialization(result, beanName);
+			Object current = processor.postProcessBeforeInitialization(result, beanName);
 			if (null == current) // 到了链表的结尾
 				return result;
 			result = current;
@@ -148,9 +166,10 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 
 
 	public Object applyBeanPostProcessorsAfterInitialization(Object existingBean, String beanName) throws BeansException {
+		System.out.println(beanName+" 实例化调用(3): processor.postProcessAfterInitialization");
 		Object result = existingBean;
 		for (BeanPostProcessor processor : getBeanPostProcessors()) {
-			Object current =processor.postProcessAfterInitialization(result, beanName);
+			Object current = processor.postProcessAfterInitialization(result, beanName);
 			if (null == current)
 				return result;
 			result = current;
