@@ -38,7 +38,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
         beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
         invokeBeanFactoryPostProcessors(beanFactory); // 执行类信息后处理函数
         registerBeanPostProcessors(beanFactory); // 执行实例信息后处理函数
-        beanFactory.preInstantiateSingletons(); // 提前实例化单例Bean对象
+        beanFactory.preInstantiateSingletons(); // 提前实例化单例Bean对象 FIXME 这里对于prototype会多构造一次对象
     }
 
     protected abstract ConfigurableListableBeanFactory getBeanFactory();

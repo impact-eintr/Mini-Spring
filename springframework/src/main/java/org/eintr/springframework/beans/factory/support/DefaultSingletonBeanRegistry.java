@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.Map;
 
 public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
+	protected static final Object NULL_OBJECT = new Object();
 	private final Map<String, Object> singletonObjects = new HashMap<>();
 
 	// BeanFactory 所有的销毁机制

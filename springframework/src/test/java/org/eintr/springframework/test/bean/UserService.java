@@ -8,7 +8,7 @@ import org.eintr.springframework.beans.factory.InitializingBean;
 public class UserService implements InitializingBean, DisposableBean, BeanNameAware {
 	private String uId;
 	private String location;
-	public UserDao userDao;
+	public IUserDao userDao;
 
 	public String Language;
 
@@ -24,11 +24,11 @@ public class UserService implements InitializingBean, DisposableBean, BeanNameAw
 		this.uId = uId;
 	}
 
-	public UserDao getUserDao() {
+	public IUserDao getUserDao() {
 		return userDao;
 	}
 
-	public void setUserDao(UserDao userDao) {
+	public void setUserDao(IUserDao userDao) {
 		this.userDao = userDao;
 	}
 

@@ -28,7 +28,12 @@ public class DefaultListableBeanFactory extends AbstructAutowireCapableBeanFacto
 
 	@Override
 	public void preInstantiateSingletons() throws BeansException {
-		beanDefinitionMap.keySet().forEach(this::getBean);
+		for (String beanName : beanDefinitionMap.keySet()) {
+			BeanDefinition beanDefinition = beanDefinitionMap.get(beanName);
+			if (beanDefinition.isSingleton()) { // 未指定单例的不初始化
+				getBean(beanName);
+			}
+		}
 	}
 
 	// 判断是否包含指定的beanDefinition

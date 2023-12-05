@@ -33,7 +33,9 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 		registerDisposableBeanIfNecessary(beanName, bean, beanDefinition);
 
 		// 添加这个单例
-		addSingleton(beanName, bean);
+		if (beanDefinition.isSingleton()) { // 通过scope指定是否设置为单例
+			addSingleton(beanName, bean);
+		}
 		return bean;
 	}
 
