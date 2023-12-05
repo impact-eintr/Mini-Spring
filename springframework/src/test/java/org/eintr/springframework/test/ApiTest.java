@@ -21,10 +21,6 @@ public class ApiTest {
 		// 3. 配置 scope="prototype/singleton"
 		System.out.println(userService01);
 		System.out.println(userService02);
-
-		// 4. 打印十六进制哈希
-		System.out.println(userService01 + " 十六进制哈希：" + Integer.toHexString(userService01.hashCode()));
-		System.out.println(ClassLayout.parseInstance(userService01).toPrintable());
 	}
 
 	@Test

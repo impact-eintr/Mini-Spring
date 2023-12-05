@@ -51,6 +51,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		// 实现了FactoryBean接口的对象
 		Object object = getCachedObjectForFactoryBean(beanName);
 		if (object == null) {
+			System.out.println(beanName+" 实例化调用(4) IOC 通过构造目标对象的代理工厂对象 FactoryBean.getObject()");
 			FactoryBean<?> factoryBean = (FactoryBean<?>) beanInstance;
 			object = getObjectFromFactoryBean(factoryBean, beanName); // 这里将调用FactoryBean.getObject()
 		}
