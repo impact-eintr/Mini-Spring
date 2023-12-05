@@ -20,8 +20,9 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 		return singletonObjects.get(beanName);
 	}
 
-	protected void addSingleton(String beaName, Object singletonObject) {
-		singletonObjects.put(beaName, singletonObject);
+	@Override
+	public void registerSingleton(String beanName, Object singletonObject) {
+		singletonObjects.put(beanName, singletonObject);
 	}
 
 	public void registerDisposableBean(String beanName, DisposableBean bean) {

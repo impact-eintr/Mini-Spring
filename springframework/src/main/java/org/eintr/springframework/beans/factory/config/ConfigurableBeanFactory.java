@@ -9,4 +9,6 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 
 	// 后处理函数 专用于实例化后对象数据的处理
 	void addBeanPostProcessor(BeanPostProcessor beanPostProcessor);
+
+	void destroySingletons();
 }

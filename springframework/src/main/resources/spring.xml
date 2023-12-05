@@ -8,4 +8,5 @@
     </bean>
     <bean class="org.eintr.springframework.test.common.MyBeanPostProcessor"/>
     <bean class="org.eintr.springframework.test.common.MyBeanFactoryPostProcessor"/>
+
 </beans>

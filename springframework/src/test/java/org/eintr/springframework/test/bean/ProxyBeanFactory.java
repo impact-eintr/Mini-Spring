@@ -19,6 +19,8 @@ public class ProxyBeanFactory implements FactoryBean<IUserDao> {
             hashMap.put("1001", "BBB");
             hashMap.put("1002", "CCC");
 
+            System.out.println(args[0]);
+
             return "你被代理了 " + method.getName() + "：" + hashMap.get(args[0].toString());
         };
 
