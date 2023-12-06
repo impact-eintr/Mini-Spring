@@ -3,18 +3,11 @@ package org.eintr.springframework.test;
 
 import org.eintr.springframework.context.support.ClassPathXmlApplicationContext;
 import org.eintr.springframework.test.bean.UserService;
+import org.eintr.springframework.test.event.CustomEvent;
 import org.junit.Test;
 import org.openjdk.jol.info.ClassLayout;
 
 public class ApiTest {
-
-	@Test
-	public void test_event() {
-		ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:spring.xml");
-		//applicationContext.publishEvent(new CustomEvent(applicationContext, 1019129009086763L, "成功了！"));
-
-		applicationContext.registerShutdownHook();
-	}
 
 	@Test
 	public void test_xml() {
@@ -22,7 +15,9 @@ public class ApiTest {
 		ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:spring.xml");
 		applicationContext.registerShutdownHook();
 
-		// 2. 获取Bean对象调用方法
+		// 2. 发布一个事件
+
+		// 3. 获取Bean对象调用方法
 		UserService userService = applicationContext.getBean("userService", UserService.class);
 		String result = userService.queryUserInfo();
 		System.out.println("测试结果：" + result);

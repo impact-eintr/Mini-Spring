@@ -9,4 +9,8 @@
     <bean class="org.eintr.springframework.test.common.MyBeanPostProcessor"/>
     <bean class="org.eintr.springframework.test.common.MyBeanFactoryPostProcessor"/>
 
+    <bean class="org.eintr.springframework.test.event.ContextClosedEventListener"/>
+    <bean class="org.eintr.springframework.test.event.ContextRefreshedEventListener"/>
+    <bean class="org.eintr.springframework.test.event.CustomEventListener"/>
+
 </beans>

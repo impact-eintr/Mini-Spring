@@ -11,6 +11,7 @@ import org.eintr.springframework.context.ApplicationEvent;
 import org.eintr.springframework.context.ApplicationListener;
 import org.eintr.springframework.context.ConfigurableApplicationContext;
 import org.eintr.springframework.context.event.ApplicationEventMulticaster;
+import org.eintr.springframework.context.event.ContextClosedEvent;
 import org.eintr.springframework.context.event.ContextRefreshedEvent;
 import org.eintr.springframework.context.event.SimpleApplicationEventMulticaster;
 import org.eintr.springframework.core.io.DefaultResourceLoader;
@@ -43,24 +44,22 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
 
 
     private void initApplicationEventMulticaster() {
-        System.out.println("初始化事件");
         ConfigurableBeanFactory beanFactory = getBeanFactory();
         applicationEventMulticaster = new SimpleApplicationEventMulticaster(beanFactory);
         beanFactory.registerSingleton(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, applicationEventMulticaster);
     }
 
     private void registerListeners() {
-        System.out.println("注册监听器");
         Collection<ApplicationListener> applicationListeners =
                 getBeansOfType(ApplicationListener.class).values();
         for (ApplicationListener listener : applicationListeners) {
+            System.out.println("注册监听器: "+listener.getClass().getName());
             applicationEventMulticaster.addApplicationListener(listener);
         }
     }
 
     private void finishRefresh() {
-        System.out.println("完成刷新");
-        publishEvent(new ContextRefreshedEvent(this));
+        publishEvent(new ContextRefreshedEvent(this)); // 通知刷新事件
     }
 
     public void publishEvent(ApplicationEvent applicationEvent) {
@@ -134,6 +133,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
 
     @Override
     public void close() {
+        System.out.println("----------------------- SPRING 准备销毁 ----------------------");
+        publishEvent(new ContextClosedEvent(this)); // 通知关闭事件
         getBeanFactory().destroySingletons();
     }
 }

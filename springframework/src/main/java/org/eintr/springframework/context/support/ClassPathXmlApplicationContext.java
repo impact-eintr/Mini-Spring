@@ -20,6 +20,7 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
     public ClassPathXmlApplicationContext(String[] configLocations) throws BeansException {
         this.configLocations = configLocations;
         refresh();
+        System.out.println("++++++++++++++++++++++ SPRING 加载结束 ++++++++++++++++++++++");
     }
 
     protected String[] getConfigLocations() {
