@@ -48,9 +48,14 @@ public abstract class AbstractApplicationEventMulticaster implements Application
         Class<? extends ApplicationListener> listenerClass = applicationListener.getClass();
         Class<?> targetClass = ClassUtils.isCglibProxyClass(listenerClass) ?
                 listenerClass.getSuperclass() : listenerClass;
+        // ApplicationListener<ContextClosedEvent>
+        // ApplicationListener<ContextRefreshedEvent>
+        // ApplicationListener<CustomEvent>
         Type genericInterface = targetClass.getGenericInterfaces()[0];
+
+        // ContextClosedEvent、ContextRefreshedEvent、CustomEvent
         Type actualTypeArgument = ((ParameterizedType) genericInterface).getActualTypeArguments()[0];
-        String className = actualTypeArgument.getTypeName();
+        String className = actualTypeArgument.getTypeName(); // CustomEvent
         Class<?> eventClassName;
         try {
             eventClassName = Class.forName(className);

@@ -63,6 +63,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
     }
 
     public void publishEvent(ApplicationEvent applicationEvent) {
+        // 广播事件 NOTE
+        // 1. getApplicationListeners 会获取所有满足条件的监听器
+        // 2. 是否满足条件是通过遍历 applicationListeners 所有的监听器 判断 该event与该listener是否是父子类
+        // 3. ApplicationListener<CustomEvent>
+        // 4. listener.onApplicationEvent(event) 触发监听器处理事件
         applicationEventMulticaster.multicastEvent(applicationEvent);
     }
 
