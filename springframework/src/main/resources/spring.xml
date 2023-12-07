@@ -2,15 +2,33 @@
     <bean id="userDao" class="org.eintr.springframework.test.bean.ProxyBeanFactory"/>
     <bean id="userService" class="org.eintr.springframework.test.bean.UserService" scope="prototype">
         <property name="uId" value="1000"/>
-        <property name="userDao" ref="userDao"/>
         <property name="Language" value="ENGLISH"/>
         <property name="location" value="北京"/>
     </bean>
+
+    <bean id="advice" class="org.eintr.springframework.test.bean.UserServiceAdvice"/>
+
+    <bean id="methodBeforeInterceptor" class="org.eintr.springframework.aop.framework.adapter.MethodBeforeAdviceInterceptor">
+        <property name="advice" ref="advice"/>
+    </bean>
+
+    <bean id="methodAfterInterceptor" class="org.eintr.springframework.aop.framework.adapter.MethodBeforeAdviceInterceptor">
+        <property name="advice" ref="advice"/>
+    </bean>
+
+    <!--切面拦截器-->
+    <bean id="pointcutAdvisor" class="org.eintr.springframework.aop.aspectj.AspectJExpressionPointcutAdvisor">
+        <property name="expression" value="execution(* org.eintr.springframework.test.bean.IUserService.*(..))"/>
+        <property name="advice" ref="methodBeforeInterceptor"/>
+    </bean>
+
+
+    <!--
     <bean class="org.eintr.springframework.test.common.MyBeanPostProcessor"/>
     <bean class="org.eintr.springframework.test.common.MyBeanFactoryPostProcessor"/>
 
     <bean class="org.eintr.springframework.test.event.ContextClosedEventListener"/>
     <bean class="org.eintr.springframework.test.event.ContextRefreshedEventListener"/>
     <bean class="org.eintr.springframework.test.event.CustomEventListener"/>
-
+    -->
 </beans>

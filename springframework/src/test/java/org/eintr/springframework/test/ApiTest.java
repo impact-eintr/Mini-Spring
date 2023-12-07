@@ -3,14 +3,19 @@ package org.eintr.springframework.test;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.eintr.springframework.aop.AdvisedSupport;
+import org.eintr.springframework.aop.ClassFilter;
 import org.eintr.springframework.aop.MethodMatcher;
 import org.eintr.springframework.aop.TargetSource;
 import org.eintr.springframework.aop.aspectj.AspectJExpressionPointcut;
+import org.eintr.springframework.aop.aspectj.AspectJExpressionPointcutAdvisor;
 import org.eintr.springframework.aop.framework.JdkDynamicAopProxy;
+import org.eintr.springframework.aop.framework.ProxyFactory;
 import org.eintr.springframework.aop.framework.ReflectiveMethodInvocation;
+import org.eintr.springframework.aop.framework.adapter.MethodBeforeAdviceInterceptor;
 import org.eintr.springframework.context.support.ClassPathXmlApplicationContext;
 import org.eintr.springframework.test.bean.IUserService;
 import org.eintr.springframework.test.bean.UserService;
+import org.eintr.springframework.test.bean.UserServiceAdvice;
 import org.eintr.springframework.test.bean.UserServiceInterceptor;
 import org.eintr.springframework.test.event.CustomEvent;
 import org.junit.Test;
@@ -27,14 +32,37 @@ public class ApiTest {
 		applicationContext.registerShutdownHook();
 
 		// 2. 发布一个事件
-		applicationContext.publishEvent(new CustomEvent(applicationContext, 114514L, "事件响应"));
+		//applicationContext.publishEvent(new CustomEvent(applicationContext, 114514L, "事件响应"));
 
-		// 3. 获取Bean对象调用方法
-		UserService userService = applicationContext.getBean("userService", UserService.class);
+		// 3. 用一个类实现一个接口
+		IUserService userService = applicationContext.getBean("userService", IUserService.class);
 		String result = userService.queryUserInfo();
 		System.out.println("测试结果：" + result);
-		System.out.println(userService.getLanguage());
-		System.out.println(userService.getLocation());
+	}
+
+
+	@Test
+	public void test_advisor() {
+		// 目标对象
+		IUserService userService = new UserService();
+
+		AspectJExpressionPointcutAdvisor advisor = new AspectJExpressionPointcutAdvisor();
+		advisor.setExpression("execution(* org.eintr.springframework.test.bean.IUserService.*(..))");
+		advisor.setAdvice(new MethodBeforeAdviceInterceptor(new UserServiceAdvice()));
+
+		ClassFilter classFilter = advisor.getPointcut().getClassFilter();
+		if (classFilter.matches(userService.getClass())) {
+			AdvisedSupport advisedSupport = new AdvisedSupport();
+
+			TargetSource targetSource = new TargetSource(userService);
+			advisedSupport.setTargetSource(targetSource);
+			advisedSupport.setMethodInterceptor((MethodInterceptor) advisor.getAdvice());
+			advisedSupport.setMethodMatcher(advisor.getPointcut().getMethodMatcher());
+			advisedSupport.setProxyTargetClass(false); // false/true，JDK动态代理、CGlib动态代理
+
+			IUserService proxy = (IUserService) new ProxyFactory(advisedSupport).getProxy();
+			System.out.println("测试结果：" + proxy.queryUserInfo());
+		}
 	}
 
 	@Test

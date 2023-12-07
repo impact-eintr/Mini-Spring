@@ -6,13 +6,11 @@ import org.eintr.springframework.beans.BeansException;
 import org.eintr.springframework.beans.PropertyValue;
 import org.eintr.springframework.beans.PropertyValues;
 import org.eintr.springframework.beans.factory.*;
-import org.eintr.springframework.beans.factory.config.AutowireCapableBeanFactory;
-import org.eintr.springframework.beans.factory.config.BeanDefinition;
-import org.eintr.springframework.beans.factory.config.BeanPostProcessor;
-import org.eintr.springframework.beans.factory.config.BeanReference;
+import org.eintr.springframework.beans.factory.config.*;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.Iterator;
 
 public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFactory implements AutowireCapableBeanFactory {
 
@@ -21,6 +19,11 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 	protected Object createBean(String beanName, BeanDefinition beanDefinition, Object[] args) throws BeansException {
 		Object bean;
 		try {
+			// 判断是否返回代理的Bean对象
+			bean = resolveBeforeInstantiation(beanName, beanDefinition);
+			if (bean != null) { // 如果是代理对象将不再由spring实例化 而是交由用户自定义的代理工厂实现
+				return bean;
+			}
 			bean = createBeanInstance(beanDefinition, beanName, args);
 			applyPropertyValues(beanName, bean, beanDefinition); // 这里还是Beanfinitiong保存好的初始信息
 			// 执行bean的初始化函数
@@ -39,13 +42,37 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 		return bean;
 	}
 
+	protected Object resolveBeforeInstantiation(String beanName, BeanDefinition beanDefinition) {
+		Object bean = applyBeanPostProcessorsBeforeInstantiation(beanDefinition.getBeanClass(), beanName);
+		if (null != bean) {
+			bean = applyBeanPostProcessorsAfterInitialization(bean, beanName);
+		}
+		return bean;
+	}
+
+	public Object applyBeanPostProcessorsBeforeInstantiation(Class<?> beanClass, String beanName) {
+		for (BeanPostProcessor processor : getBeanPostProcessors()) {
+			if (processor instanceof InstantiationAwareBeanPostProcessor) {
+				Object result = ((InstantiationAwareBeanPostProcessor) processor).
+						postProcessBeforeInstantiation(beanClass, beanName);
+				if (null != result) {
+					System.out.println(beanName+" 代理实例化调用(0): InstantiationAwareBeanPostProcessor.postProcessBeforeInitialization");
+					return result;
+				}
+			}
+		}
+		return null;
+	}
+
 	protected void registerDisposableBeanIfNecessary(String beanName, Object bean, BeanDefinition beanDefinition) {
+		// 非 Singleton 类型的 Bean 不执行销毁方法
+		if (!beanDefinition.isSingleton()) return;
+
 		if (bean instanceof DisposableBean ||
 				StrUtil.isNotEmpty(beanDefinition.getDestroyMethodName())) {
 			registerDisposableBean(beanName, new
 					DisposableBeanAdapter(bean, beanName, beanDefinition));
 		}
-
 	}
 
 	protected Object createBeanInstance(BeanDefinition beanDefinition, String beanName, Object[] args) {
@@ -154,28 +181,31 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 	}
 
+	@Override
 	public Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, String beanName) throws BeansException {
-		System.out.println(beanName+" 实例化调用(1): processor.postProcessBeforeInitialization");
 		Object result = existingBean;
-		for (BeanPostProcessor processor : getBeanPostProcessors()) {
-			Object current = processor.postProcessBeforeInitialization(result, beanName);
-			if (null == current) // 到了链表的结尾
-				return result;
-			result = current;
-		}
+		int i = 1;
+        for (BeanPostProcessor processor : getBeanPostProcessors()) {
+            System.out.println(beanName + " 实例化调用(1."+(i++)+"): " + processor.getClass().getSimpleName() + ".postProcessBeforeInitialization");
+            Object current = processor.postProcessBeforeInitialization(result, beanName);
+            if (null == current) // 到了链表的结尾
+                return result;
+            result = current;
+        }
 		return result;
 	}
 
 
 	public Object applyBeanPostProcessorsAfterInitialization(Object existingBean, String beanName) throws BeansException {
-		System.out.println(beanName+" 实例化调用(3): processor.postProcessAfterInitialization");
 		Object result = existingBean;
-		for (BeanPostProcessor processor : getBeanPostProcessors()) {
-			Object current = processor.postProcessAfterInitialization(result, beanName);
-			if (null == current)
-				return result;
-			result = current;
-		}
+		int i = 1;
+        for (BeanPostProcessor processor : getBeanPostProcessors()) {
+            System.out.println(beanName + " 实例化调用(3."+(i++)+"): " + processor.getClass().getSimpleName() + ".postProcessAfterInitialization");
+            Object current = processor.postProcessAfterInitialization(result, beanName);
+            if (null == current)
+                return result;
+            result = current;
+        }
 		return result;
 	}
 }

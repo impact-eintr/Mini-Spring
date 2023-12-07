@@ -1,10 +1,11 @@
 package org.eintr.springframework.context.support;
 
+import cn.hutool.core.util.StrUtil;
+import org.eintr.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.eintr.springframework.beans.BeansException;
+import org.eintr.springframework.beans.PropertyValue;
 import org.eintr.springframework.beans.factory.ConfigurableListableBeanFactory;
-import org.eintr.springframework.beans.factory.config.BeanFactoryPostProcessor;
-import org.eintr.springframework.beans.factory.config.BeanPostProcessor;
-import org.eintr.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.eintr.springframework.beans.factory.config.*;
 import org.eintr.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.eintr.springframework.context.ApplicationContext;
 import org.eintr.springframework.context.ApplicationEvent;
@@ -15,6 +16,7 @@ import org.eintr.springframework.context.event.ContextClosedEvent;
 import org.eintr.springframework.context.event.ContextRefreshedEvent;
 import org.eintr.springframework.context.event.SimpleApplicationEventMulticaster;
 import org.eintr.springframework.core.io.DefaultResourceLoader;
+import org.w3c.dom.Element;
 
 import java.util.Collection;
 import java.util.Map;
@@ -41,7 +43,6 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
             beanFactory.addBeanPostProcessor(beanPostProcessor);
         }
     }
-
 
     private void initApplicationEventMulticaster() {
         ConfigurableBeanFactory beanFactory = getBeanFactory();
@@ -118,7 +119,6 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
     @Override
     public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
         return getBeanFactory().getBean(name, requiredType);
-
     }
 
     @Override

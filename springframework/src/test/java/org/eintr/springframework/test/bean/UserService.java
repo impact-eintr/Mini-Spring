@@ -5,7 +5,7 @@ import org.eintr.springframework.beans.factory.DisposableBean;
 import org.eintr.springframework.beans.factory.InitializingBean;
 
 
-public class UserService implements  IUserService{
+public class UserService implements IUserService {
 	private String uId;
 	private String location;
 

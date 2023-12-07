@@ -2,6 +2,7 @@ package org.eintr.springframework.beans.factory.xml;
 
 import cn.hutool.core.util.XmlUtil;
 import cn.hutool.core.util.StrUtil;
+import org.eintr.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.eintr.springframework.beans.BeansException;
 import org.eintr.springframework.beans.PropertyValue;
 import org.eintr.springframework.core.io.Resource;
@@ -58,6 +59,12 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		Document doc = XmlUtil.readXML(inputStream);
 		Element root = doc.getDocumentElement();
 		NodeList childNodes = root.getChildNodes();
+
+		// 默认实现AOP
+		getRegister().registerBeanDefinition(
+				StrUtil.lowerFirst(DefaultAdvisorAutoProxyCreator.class.getSimpleName()),
+				new BeanDefinition(DefaultAdvisorAutoProxyCreator.class));
+
 		for (int i  = 0;i < childNodes.getLength();i++) {
 			if (!(childNodes.item(i) instanceof Element)) { // 判断的元素
 				continue;
@@ -76,7 +83,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 			Class<?> clazz = Class.forName(className);
 			String beanName = StrUtil.isNotEmpty(id) ? id : name; // id 优先级高于 name
 			if (StrUtil.isEmpty(beanName)) {
-				beanName = StrUtil.lowerFirst(clazz.getSimpleName());
+				beanName = StrUtil.lowerFirst(clazz.getSimpleName()); // 没指定名字的话就用类名
 			}
 
 			/*
@@ -113,7 +120,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 			}
 			// 检查重复元素
 			if (getRegister().containsBeanDefinition(beanName)) {
-				throw new BeansException("Duplicate beanName["+"] is not allowed");
+				throw new BeansException("Duplicate beanName["+beanName+"] is not allowed");
 			}
 			//注册 Beanfinition
 			getRegister().registerBeanDefinition(beanName, beanDefinition);
