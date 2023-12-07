@@ -32,6 +32,7 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
         return bean;
     }
 
+    // TODO spring默认实现AOP的逻辑
     @Override
     public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException {
         if (isInfrastuctureClass(beanClass)) {
@@ -46,7 +47,7 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
             if (!classFilter.matches(beanClass)) {
                 continue;
             }
-            System.out.println("AOP 检查中");
+            System.out.println("SPRING 将使用用户自定义的 方法代理 构造实例");
             AdvisedSupport advisedSupport = new AdvisedSupport();
             TargetSource targetSource = null;
             try {

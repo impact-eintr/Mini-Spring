@@ -20,7 +20,7 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 		Object bean;
 		try {
 			// 判断是否返回代理的Bean对象
-			bean = resolveBeforeInstantiation(beanName, beanDefinition);
+			bean = resolveBeforeInstantiation(beanName, beanDefinition); // TODO AOP 实现入口
 			if (bean != null) { // 如果是代理对象将不再由spring实例化 而是交由用户自定义的代理工厂实现
 				return bean;
 			}
