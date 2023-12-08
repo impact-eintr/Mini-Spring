@@ -5,7 +5,7 @@ import org.eintr.springframework.core.io.Resource;
 import org.eintr.springframework.core.io.ResourceLoader;
 
 public interface BeanDefinitionReader {
-    BeanDefinitionRegistry getRegister();
+    BeanDefinitionRegistry getRegistry();
 
     ResourceLoader getResourceLoader();
 

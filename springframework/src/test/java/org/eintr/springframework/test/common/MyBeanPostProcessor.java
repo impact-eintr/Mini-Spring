@@ -2,8 +2,10 @@ package org.eintr.springframework.test.common;
 
 import org.eintr.springframework.beans.BeansException;
 import org.eintr.springframework.beans.factory.config.BeanPostProcessor;
+import org.eintr.springframework.stereotype.Component;
 import org.eintr.springframework.test.bean.UserService;
 
+@Component
 public class MyBeanPostProcessor implements BeanPostProcessor {
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {

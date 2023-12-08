@@ -1,12 +1,14 @@
 package org.eintr.springframework.test.bean;
 
 import org.eintr.springframework.beans.factory.FactoryBean;
+import org.eintr.springframework.stereotype.Component;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Map;
 
+@Component("userDao")
 public class ProxyBeanFactory implements FactoryBean<IUserDao> {
     @Override
     public IUserDao getObject() throws Exception {

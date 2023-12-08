@@ -2,7 +2,9 @@ package org.eintr.springframework.test.event;
 
 import org.eintr.springframework.context.ApplicationListener;
 import org.eintr.springframework.context.event.ContextRefreshedEvent;
+import org.eintr.springframework.stereotype.Component;
 
+@Component
 public class ContextRefreshedEventListener implements ApplicationListener<ContextRefreshedEvent> {
 
     @Override

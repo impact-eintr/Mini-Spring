@@ -18,7 +18,7 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
     }
 
 
-    public BeanDefinitionRegistry getRegister() {
+    public BeanDefinitionRegistry getRegistry() {
         return registry;
     }
 

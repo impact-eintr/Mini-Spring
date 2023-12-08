@@ -1,10 +1,8 @@
 package org.eintr.springframework.test.bean;
 
-import org.eintr.springframework.beans.factory.BeanNameAware;
-import org.eintr.springframework.beans.factory.DisposableBean;
-import org.eintr.springframework.beans.factory.InitializingBean;
+import org.eintr.springframework.stereotype.Component;
 
-
+@Component("userService")
 public class UserService implements IUserService {
 	private String uId;
 	private String location;
