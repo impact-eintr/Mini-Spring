@@ -13,6 +13,11 @@ public class UserService implements IUserService {
 
 
 	public String queryUserInfo(String name) {
+		try {
+			Thread.sleep(10);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
 		return "queryUserInfo: "+location;
 	}
 

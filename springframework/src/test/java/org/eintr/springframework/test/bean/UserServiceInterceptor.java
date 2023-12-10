@@ -2,6 +2,7 @@ package org.eintr.springframework.test.bean;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.eintr.springframework.stereotype.Component;
 
 public class UserServiceInterceptor implements MethodInterceptor {
     @Override
@@ -13,7 +14,7 @@ public class UserServiceInterceptor implements MethodInterceptor {
             System.out.println("监控 - Begin By AOP");
             System.out.println("方法名称：" + invocation.getMethod().getName());
             System.out.println("方法耗时：" + (System.currentTimeMillis() - start) + "ms");
-            System.out.println("监控 - End\r\n");
+            System.out.println("监控 - End");
         }
     }
 }

@@ -33,9 +33,9 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 				return bean;
 			}
 
-			// 允许BeanPostProcessor 修改属性值 这个函数是给属性修改专用的
+			// 新增属性 读取类属性带 @Value 注解的附带的值
 			applyBeanPostProcessorsBeforeApplyingPropertyValues(beanName, bean, beanDefinition);
-			// 这里还是Beanfinitiong保存好的初始信息
+			// 允许BeanPostProcessor 修改属性值 这个函数是给属性修改专用的
 			applyPropertyValues(beanName, bean, beanDefinition);
 			// 执行bean的初始化函数 这里已经是经过类实例后处理后的数据
 			bean = initializeBean(beanName, bean, beanDefinition);
@@ -73,6 +73,7 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 	protected void applyBeanPostProcessorsBeforeApplyingPropertyValues(String beanName, Object bean, BeanDefinition beanDefinition) {
 		for (BeanPostProcessor processor : getBeanPostProcessors()) {
 			if (processor instanceof InstantiationAwareBeanPostProcessor) {
+				// 没有在xml中配置的属性 不会有值 也不属于BeanDefinition的属性 需要添加@Value的注解
 				PropertyValues propertyValues = ((InstantiationAwareBeanPostProcessor)processor)
 						.postProcessPropertyValues(beanDefinition.getPropertyValues(),
 								bean,  beanName);

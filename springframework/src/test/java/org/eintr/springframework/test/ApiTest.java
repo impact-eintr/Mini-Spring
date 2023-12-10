@@ -32,7 +32,7 @@ public class ApiTest {
 		applicationContext.registerShutdownHook();
 
 		// 2. 发布一个事件
-		//applicationContext.publishEvent(new CustomEvent(applicationContext, 114514L, "事件响应"));
+		applicationContext.publishEvent(new CustomEvent(applicationContext, 114514L, "事件响应"));
 
 		// 3. 用一个类实现一个接口
 		IUserService userService = applicationContext.getBean("userService", IUserService.class);
