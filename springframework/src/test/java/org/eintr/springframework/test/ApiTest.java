@@ -36,7 +36,7 @@ public class ApiTest {
 
 		// 3. 用一个类实现一个接口
 		IUserService userService = applicationContext.getBean("userService", IUserService.class);
-		String result = userService.queryUserInfo();
+		String result = userService.queryUserInfo("AAA");
 		System.out.println("测试结果：" + result);
 	}
 
@@ -61,7 +61,7 @@ public class ApiTest {
 			advisedSupport.setProxyTargetClass(false); // false/true，JDK动态代理、CGlib动态代理
 
 			IUserService proxy = (IUserService) new ProxyFactory(advisedSupport).getProxy();
-			System.out.println("测试结果：" + proxy.queryUserInfo());
+			System.out.println("测试结果：" + proxy.queryUserInfo("AAA"));
 		}
 	}
 
@@ -142,6 +142,6 @@ public class ApiTest {
 		// 代理对象(JdkDynamicAopProxy)
 		IUserService proxy_jdk = (IUserService) new JdkDynamicAopProxy(advisedSupport).getProxy();
 		// 测试调用
-		System.out.println("测试结果：" + proxy_jdk.queryUserInfo());
+		System.out.println("测试结果：" + proxy_jdk.queryUserInfo("AAA"));
 	}
 }

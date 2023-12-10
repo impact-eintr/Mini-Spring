@@ -23,9 +23,8 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
         System.out.println("++++++++++++++++++++++ SPRING 加载结束 ++++++++++++++++++++++");
     }
 
+    @Override
     protected String[] getConfigLocations() {
         return configLocations;
     }
-
-
 }

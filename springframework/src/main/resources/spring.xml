@@ -10,11 +10,6 @@
         <property name="advice" ref="advice"/>
     </bean>
 
-    <bean id="methodAfterInterceptor"
-          class="org.eintr.springframework.aop.framework.adapter.MethodBeforeAdviceInterceptor">
-        <property name="advice" ref="advice"/>
-    </bean>
-
     <!--切面拦截器-->
     <bean id="pointcutAdvisor" class="org.eintr.springframework.aop.aspectj.AspectJExpressionPointcutAdvisor">
         <property name="expression" value="execution(* org.eintr.springframework.test.bean.IUserService.*(..))"/>

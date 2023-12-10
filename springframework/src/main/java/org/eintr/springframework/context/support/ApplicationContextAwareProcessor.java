@@ -6,6 +6,7 @@ import org.eintr.springframework.context.ApplicationContext;
 import org.eintr.springframework.context.ApplicationContextAware;
 
 public class ApplicationContextAwareProcessor implements BeanPostProcessor {
+
     private final ApplicationContext applicationContext;
 
     public ApplicationContextAwareProcessor(ApplicationContext applicationContext) {

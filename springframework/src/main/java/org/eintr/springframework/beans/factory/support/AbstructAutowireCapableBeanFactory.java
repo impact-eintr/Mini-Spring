@@ -2,6 +2,7 @@ package org.eintr.springframework.beans.factory.support;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
+import org.eintr.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.eintr.springframework.beans.BeansException;
 import org.eintr.springframework.beans.PropertyValue;
 import org.eintr.springframework.beans.PropertyValues;
@@ -20,14 +21,24 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 		Object bean;
 		try {
 			// 判断是否返回代理的Bean对象
-			bean = resolveBeforeInstantiation(beanName, beanDefinition); // TODO AOP 实现入口
+			bean = resolveBeforeInstantiation(beanName, beanDefinition);
 			if (bean != null) { // 如果是代理对象将不再由spring实例化 而是交由用户自定义的代理工厂实现
 				return bean;
 			}
 			bean = createBeanInstance(beanDefinition, beanName, args);
-			applyPropertyValues(beanName, bean, beanDefinition); // 这里还是Beanfinitiong保存好的初始信息
-			// 执行bean的初始化函数
-			bean = initializeBean(beanName, bean, beanDefinition); // 这里已经是经过类实例后处理后的数据
+			// 构造完对象后再次判断是否是使用了 AOP 代理的接口
+			boolean continueWithPropertyPopulation =
+					applyBeanPostProcessorsAfterInstantiation(beanName, bean);
+			if (!continueWithPropertyPopulation) {
+				return bean;
+			}
+
+			// 允许BeanPostProcessor 修改属性值 这个函数是给属性修改专用的
+			applyBeanPostProcessorsBeforeApplyingPropertyValues(beanName, bean, beanDefinition);
+			// 这里还是Beanfinitiong保存好的初始信息
+			applyPropertyValues(beanName, bean, beanDefinition);
+			// 执行bean的初始化函数 这里已经是经过类实例后处理后的数据
+			bean = initializeBean(beanName, bean, beanDefinition);
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new BeansException("Instantiation of bean failed", e);
@@ -42,6 +53,38 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 		return bean;
 	}
 
+
+	private boolean applyBeanPostProcessorsAfterInstantiation(String beanName, Object bean) {
+		boolean continueWithPropertyPopulation = true;
+		for (BeanPostProcessor beanPostProcessor : getBeanPostProcessors()) {
+			if (beanPostProcessor instanceof InstantiationAwareBeanPostProcessor) { // AOP 处理器
+				InstantiationAwareBeanPostProcessor instantiationAwareBeanPostProcessor =
+						(InstantiationAwareBeanPostProcessor) beanPostProcessor;
+				if (!instantiationAwareBeanPostProcessor.
+						postProcessAfterInstantiation(bean, beanName)) {
+					continueWithPropertyPopulation = false;
+					break;
+				}
+			}
+		}
+		return continueWithPropertyPopulation;
+	}
+
+	protected void applyBeanPostProcessorsBeforeApplyingPropertyValues(String beanName, Object bean, BeanDefinition beanDefinition) {
+		for (BeanPostProcessor processor : getBeanPostProcessors()) {
+			if (processor instanceof InstantiationAwareBeanPostProcessor) {
+				PropertyValues propertyValues = ((InstantiationAwareBeanPostProcessor)processor)
+						.postProcessPropertyValues(beanDefinition.getPropertyValues(),
+								bean,  beanName);
+				if (null != propertyValues) {
+					for (PropertyValue propertyValue : propertyValues.getPropertyValues()) {
+						beanDefinition.getPropertyValues().addPropertyValue(propertyValue);
+					}
+				}
+			}
+		}
+	}
+
 	protected Object resolveBeforeInstantiation(String beanName, BeanDefinition beanDefinition) {
 		Object bean = applyBeanPostProcessorsBeforeInstantiation(beanDefinition.getBeanClass(), beanName);
 		if (null != bean) {
@@ -53,10 +96,8 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 	public Object applyBeanPostProcessorsBeforeInstantiation(Class<?> beanClass, String beanName) {
 		for (BeanPostProcessor processor : getBeanPostProcessors()) {
 			if (processor instanceof InstantiationAwareBeanPostProcessor) {
-				Object result = ((InstantiationAwareBeanPostProcessor) processor).
-						postProcessBeforeInstantiation(beanClass, beanName);
+				Object result = ((InstantiationAwareBeanPostProcessor) processor).postProcessBeforeInstantiation(beanClass, beanName);
 				if (null != result) {
-					System.out.println(beanName+" 代理实例化调用(0): InstantiationAwareBeanPostProcessor.postProcessBeforeInitialization");
 					return result;
 				}
 			}
@@ -152,6 +193,7 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 					beanName + "] failed", e);
 		}
 
+		// 在填充完属性值后 构造对象
 		wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
 		return wrappedBean;
 	}
@@ -201,6 +243,7 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 		int i = 1;
         for (BeanPostProcessor processor : getBeanPostProcessors()) {
             System.out.println(beanName + " 实例化调用(3."+(i++)+"): " + processor.getClass().getSimpleName() + ".postProcessAfterInitialization");
+			// DefaultAdvisorAutoProxyCreator.postProcessAfterInitialization 负责实现AOP机制
             Object current = processor.postProcessAfterInitialization(result, beanName);
             if (null == current)
                 return result;

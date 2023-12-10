@@ -1,6 +1,8 @@
 package org.eintr.springframework.context.annotation;
 
 import cn.hutool.core.util.StrUtil;
+import org.eintr.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
+import org.eintr.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.eintr.springframework.beans.factory.config.BeanDefinition;
 import org.eintr.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.eintr.springframework.stereotype.Component;
@@ -26,6 +28,9 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
                 registry.registerBeanDefinition(determineBeanName(beanDefinition), beanDefinition);
             }
         }
+        registry.registerBeanDefinition(
+                StrUtil.lowerFirst(AutowiredAnnotationBeanPostProcessor.class.getName()),
+                new BeanDefinition(AutowiredAnnotationBeanPostProcessor.class));
     }
 
     private String resolveBeanScope(BeanDefinition beanDefinition) {

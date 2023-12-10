@@ -98,7 +98,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
 
         registerListeners();// 初始化事件监听器
 
-        beanFactory.preInstantiateSingletons(); // 提前实例化除了 BeanFactoryPostProcessor 以及 BeanPostProcessor 的单例Bean对象
+        // 提前实例化除了 BeanFactoryPostProcessor 以及 BeanPostProcessor 的单例Bean对象
+        beanFactory.preInstantiateSingletons();
 
         finishRefresh(); // 发布容器 刷新完成事件
     }
@@ -119,6 +120,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
     @Override
     public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
         return getBeanFactory().getBean(name, requiredType);
+    }
+
+    @Override
+    public <T> T getBean(Class<T> requiredType) throws BeansException {
+        return getBeanFactory().getBean(requiredType);
     }
 
     @Override

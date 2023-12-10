@@ -1,6 +1,7 @@
 package org.eintr.springframework.test.bean;
 
 import org.eintr.springframework.beans.factory.FactoryBean;
+import org.eintr.springframework.beans.factory.annotation.Value;
 import org.eintr.springframework.stereotype.Component;
 
 import java.lang.reflect.InvocationHandler;
@@ -10,6 +11,15 @@ import java.util.Map;
 
 @Component("userDao")
 public class ProxyBeanFactory implements FactoryBean<IUserDao> {
+    @Value("EINTR")
+    public String name;
+
+    @Value("10000")
+    private String uId;
+
+    @Value("天津")
+    private String location;
+
     @Override
     public IUserDao getObject() throws Exception {
         InvocationHandler handler = (proxy, method, args) -> {

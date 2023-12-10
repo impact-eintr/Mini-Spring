@@ -1,12 +1,12 @@
 package org.eintr.springframework.beans.factory.support;
 
 import org.eintr.springframework.beans.BeansException;
-import org.eintr.springframework.beans.factory.BeanFactory;
 import org.eintr.springframework.beans.factory.FactoryBean;
 import org.eintr.springframework.beans.factory.config.BeanDefinition;
 import org.eintr.springframework.beans.factory.config.BeanPostProcessor;
 import org.eintr.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.eintr.springframework.util.ClassUtils;
+import org.eintr.springframework.util.StringValueResolver;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +17,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 	// 所有的
 	private final List<BeanPostProcessor> beanPostProcessors = new ArrayList<BeanPostProcessor>();
+
+	private final List<StringValueResolver> embeddedValueResolvers = new ArrayList<>();
 
 	// 获取Bean
 	@Override
@@ -66,7 +68,25 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		this.beanPostProcessors.add(beanPostProcessor);
 	}
 
+
+	@Override
+	public void addEmbeddedValueResolver(StringValueResolver valueResolver) {
+		this.embeddedValueResolvers.add(valueResolver);
+	}
+
+	@Override
+	public String resolveEmbeddedValueResolver(String value) {
+		String result = value;
+		for (StringValueResolver resolver : this.embeddedValueResolvers) {
+			result = resolver.resolveStringValue(result);
+		}
+		return result;
+	}
+
 	public List<BeanPostProcessor> getBeanPostProcessors() {
+		// ApplicationContextAwarePorcessor    1. 容器感知处理器
+		// DefaultAdvisorAutoProxyCreator      2. 是实现AOP机制的实例处理器
+		// AutowiredAnnotationBeanPostProcess  3. 自解析注解处理器
 		return this.beanPostProcessors;
 	}
 

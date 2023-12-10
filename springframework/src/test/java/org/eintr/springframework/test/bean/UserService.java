@@ -1,21 +1,19 @@
 package org.eintr.springframework.test.bean;
 
+import org.eintr.springframework.beans.factory.annotation.Value;
 import org.eintr.springframework.stereotype.Component;
 
 @Component("userService")
 public class UserService implements IUserService {
-	private String uId;
+
+	@Value("天津")
 	private String location;
 
-	public String Language;
-
-	public String queryUserInfo() {
-		return "queryUserInfo";
-	}
+	private IUserDao userDao;
 
 
 	public String queryUserInfo(String name) {
-		return "queryUserInfo: "+name;
+		return "queryUserInfo: "+location;
 	}
 
 	@Override
@@ -23,13 +21,6 @@ public class UserService implements IUserService {
 		return "register";
 	}
 
-	public String getuId() {
-		return uId;
-	}
-
-	public void setuId(String uId) {
-		this.uId = uId;
-	}
 
 	public String getLocation() {
 		return location;
@@ -37,13 +28,5 @@ public class UserService implements IUserService {
 
 	public void setLocation(String location) {
 		this.location = location;
-	}
-
-	public String getLanguage() {
-		return Language;
-	}
-
-	public void setLanguage(String language) {
-		Language = language;
 	}
 }
