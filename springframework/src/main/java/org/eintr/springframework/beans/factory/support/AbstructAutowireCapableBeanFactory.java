@@ -18,14 +18,27 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 	protected InstantiationStrategy instantiationStrategy = new SimpleInstantiationStrategy();
 	@Override
 	protected Object createBean(String beanName, BeanDefinition beanDefinition, Object[] args) throws BeansException {
-		Object bean;
+		// 判断是否返回代理的Bean对象
+		Object bean = resolveBeforeInstantiation(beanName, beanDefinition);
+		if (bean != null) { // 如果是代理对象将不再由spring实例化 而是交由用户自定义的代理工厂实现
+			return bean;
+		}
+
+		return doCreateBean(beanName, beanDefinition, args);
+	}
+
+	protected Object doCreateBean(String beanName, BeanDefinition beanDefinition, Object[] args) throws BeansException {
+		Object bean = null;
 		try {
-			// 判断是否返回代理的Bean对象
-			bean = resolveBeforeInstantiation(beanName, beanDefinition);
-			if (bean != null) { // 如果是代理对象将不再由spring实例化 而是交由用户自定义的代理工厂实现
-				return bean;
-			}
 			bean = createBeanInstance(beanDefinition, beanName, args);
+
+			// 处理循环依赖 创建完实例后 存放在缓存
+			if (beanDefinition.isSingleton()) {
+				Object finalBean = bean;
+				addSingletonFactory(beanName, () ->
+						getEarlyBeanReference(beanName, beanDefinition, finalBean));
+			}
+
 			// 构造完对象后再次判断是否是使用了 AOP 代理的接口
 			boolean continueWithPropertyPopulation =
 					applyBeanPostProcessorsAfterInstantiation(beanName, bean);
@@ -46,11 +59,29 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 
 		registerDisposableBeanIfNecessary(beanName, bean, beanDefinition);
 
+		Object exposedObject = bean;
 		// 添加这个单例
 		if (beanDefinition.isSingleton()) { // 通过scope指定是否设置为单例
-			registerSingleton(beanName, bean);
+			// 获取代理对象
+			exposedObject = getSingleton(beanName);
+			registerSingleton(beanName, exposedObject);
 		}
-		return bean;
+		return exposedObject;
+	}
+
+	protected Object getEarlyBeanReference(String beanName, BeanDefinition beanDefinition, Object bean) {
+		Object exposedObject = bean;
+		for (BeanPostProcessor beanPostProcessor : getBeanPostProcessors()) {
+			// 处理AOP机制 DefaultAdviseCreate
+			if (beanPostProcessor instanceof InstantiationAwareBeanPostProcessor) {
+				exposedObject = ((InstantiationAwareBeanPostProcessor)beanPostProcessor).
+						getEarlyBeanReference(bean, beanName);
+				if (null == exposedObject) {
+					return exposedObject;
+				}
+			}
+		}
+		return exposedObject;
 	}
 
 

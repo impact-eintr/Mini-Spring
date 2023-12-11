@@ -15,9 +15,14 @@ import org.eintr.springframework.beans.factory.config.InstantiationAwareBeanPost
 import org.eintr.springframework.beans.factory.support.DefaultListableBeanFactory;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPostProcessor, BeanFactoryAware {
     private DefaultListableBeanFactory beanFactory;
+
+    private final Set<Object> earlyProxyReferences = Collections.synchronizedSet(new HashSet<Object>());
 
     @Override
     public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
@@ -76,5 +81,11 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
     private boolean isInfrastuctureClass(Class<?> beanClass) {
         return Advice.class.isAssignableFrom(beanClass) || Pointcut.class.isAssignableFrom(beanClass) ||
                 Advisor.class.isAssignableFrom(beanClass);
+    }
+
+
+    @Override
+    public Object getEarlyBeanReference(Object bean, String beanName) {
+
     }
 }
