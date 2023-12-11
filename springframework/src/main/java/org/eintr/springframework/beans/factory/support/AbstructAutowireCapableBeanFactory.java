@@ -35,6 +35,7 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 			// 处理循环依赖 创建完实例后 存放在缓存
 			if (beanDefinition.isSingleton()) {
 				Object finalBean = bean;
+				// 先添加到二级缓存
 				addSingletonFactory(beanName, () ->
 						getEarlyBeanReference(beanName, beanDefinition, finalBean));
 			}
@@ -77,7 +78,7 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 				exposedObject = ((InstantiationAwareBeanPostProcessor)beanPostProcessor).
 						getEarlyBeanReference(bean, beanName);
 				if (null == exposedObject) {
-					return exposedObject;
+					return null;
 				}
 			}
 		}

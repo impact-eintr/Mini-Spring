@@ -37,30 +37,10 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
     // TODO spring默认实现AOP的逻辑
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        Class<?> beanClass = bean.getClass();
-        if (isInfrastuctureClass(beanClass)) {
-            return null;
+        if (!earlyProxyReferences.contains(beanName)) {
+            return wrapIfNecessary(bean, beanName);
         }
-        // 在beans中找到所有的拦截器
-        Collection<AspectJExpressionPointcutAdvisor> advisors =
-                beanFactory.getBeansOfType(AspectJExpressionPointcutAdvisor.class).values();
-
-        for (AspectJExpressionPointcutAdvisor advisor : advisors) {
-            ClassFilter classFilter = advisor.getPointcut().getClassFilter();
-            if (!classFilter.matches(beanClass)) {
-                continue;
-            }
-            AdvisedSupport advisedSupport = new AdvisedSupport();
-            TargetSource targetSource = new TargetSource(bean);
-            advisedSupport.setTargetSource(targetSource);
-            advisedSupport.setMethodInterceptor((MethodInterceptor) advisor.getAdvice());
-            advisedSupport.setMethodMatcher(advisor.getPointcut().getMethodMatcher());
-            advisedSupport.setProxyTargetClass(false);
-
-            System.out.println("============SPRING AOP 将使用用户自定义的 方法代理 构造实例========");
-            return new ProxyFactory(advisedSupport).getProxy();
-        }
-        return null;
+        return bean;
     }
 
     @Override
@@ -79,13 +59,41 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
     }
 
     private boolean isInfrastuctureClass(Class<?> beanClass) {
+        // 判断是否是拦截器
         return Advice.class.isAssignableFrom(beanClass) || Pointcut.class.isAssignableFrom(beanClass) ||
                 Advisor.class.isAssignableFrom(beanClass);
     }
 
+    protected Object wrapIfNecessary(Object bean, String beanName) {
+        Class<?> beanClass = bean.getClass();
+        if (isInfrastuctureClass(beanClass)) { // 如果是拦截器 不需要继续构造
+            return bean;
+        }
+        // 对于非拦截器的bean 在beans中找到所有的拦截器
+        Collection<AspectJExpressionPointcutAdvisor> advisors =
+                beanFactory.getBeansOfType(AspectJExpressionPointcutAdvisor.class).values();
+
+        for (AspectJExpressionPointcutAdvisor advisor : advisors) {
+            ClassFilter classFilter = advisor.getPointcut().getClassFilter();
+            if (!classFilter.matches(beanClass)) {
+                continue;
+            }
+            AdvisedSupport advisedSupport = new AdvisedSupport();
+            TargetSource targetSource = new TargetSource(bean);
+            advisedSupport.setTargetSource(targetSource);
+            advisedSupport.setMethodInterceptor((MethodInterceptor) advisor.getAdvice());
+            advisedSupport.setMethodMatcher(advisor.getPointcut().getMethodMatcher());
+            advisedSupport.setProxyTargetClass(false);
+
+            System.out.println("============SPRING AOP 将使用用户自定义的 方法代理 构造实例========");
+            return new ProxyFactory(advisedSupport).getProxy();
+        }
+        return bean;
+    }
 
     @Override
     public Object getEarlyBeanReference(Object bean, String beanName) {
-
+        earlyProxyReferences.add(beanName);
+        return wrapIfNecessary(bean, beanName);
     }
 }

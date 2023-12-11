@@ -13,10 +13,7 @@ import org.eintr.springframework.aop.framework.ProxyFactory;
 import org.eintr.springframework.aop.framework.ReflectiveMethodInvocation;
 import org.eintr.springframework.aop.framework.adapter.MethodBeforeAdviceInterceptor;
 import org.eintr.springframework.context.support.ClassPathXmlApplicationContext;
-import org.eintr.springframework.test.bean.IUserService;
-import org.eintr.springframework.test.bean.UserService;
-import org.eintr.springframework.test.bean.UserServiceAdvice;
-import org.eintr.springframework.test.bean.UserServiceInterceptor;
+import org.eintr.springframework.test.bean.*;
 import org.eintr.springframework.test.event.CustomEvent;
 import org.junit.Test;
 import java.lang.reflect.InvocationHandler;
@@ -38,6 +35,18 @@ public class ApiTest {
 		IUserService userService = applicationContext.getBean("userService", IUserService.class);
 		String result = userService.queryUserInfo("AAA");
 		System.out.println("测试结果：" + result);
+	}
+
+
+	@Test
+	public void test_dependency() {
+		// 1.初始化 BeanFactory
+		ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:spring.xml");
+		applicationContext.registerShutdownHook();
+		A a = (A) applicationContext.getBean("A", "A_NAME");
+
+
+
 	}
 
 
