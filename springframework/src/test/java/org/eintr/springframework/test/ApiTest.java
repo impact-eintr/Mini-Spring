@@ -43,10 +43,8 @@ public class ApiTest {
 		// 1.初始化 BeanFactory
 		ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:spring.xml");
 		applicationContext.registerShutdownHook();
-		A a = (A) applicationContext.getBean("A", "A_NAME");
-
-
-
+		A a = (A) applicationContext.getBean("A", A.class);
+		B b = (B) applicationContext.getBean("B", B.class);
 	}
 
 

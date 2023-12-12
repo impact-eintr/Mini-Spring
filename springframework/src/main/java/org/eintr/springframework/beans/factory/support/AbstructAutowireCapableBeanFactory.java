@@ -23,7 +23,6 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 		if (bean != null) { // 如果是代理对象将不再由spring实例化 而是交由用户自定义的代理工厂实现
 			return bean;
 		}
-
 		return doCreateBean(beanName, beanDefinition, args);
 	}
 
@@ -32,12 +31,12 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 		try {
 			bean = createBeanInstance(beanDefinition, beanName, args);
 
-			// 处理循环依赖 创建完实例后 存放在缓存
+			// 处理循环依赖 创建完实例后 存放在二级缓存 用于暴露该对象
 			if (beanDefinition.isSingleton()) {
 				Object finalBean = bean;
-				// 先添加到二级缓存
-				addSingletonFactory(beanName, () ->
-						getEarlyBeanReference(beanName, beanDefinition, finalBean));
+				// 先添加到二级缓存(暴露这个半成品)
+				addEarlySingletonObjects(beanName, finalBean);
+				// TODO addSingletonFactory(beanName, () -> getEarlyBeanReference(beanName, beanDefinition, finalBean));
 			}
 
 			// 构造完对象后再次判断是否是使用了 AOP 代理的接口
@@ -63,7 +62,7 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 		Object exposedObject = bean;
 		// 添加这个单例
 		if (beanDefinition.isSingleton()) { // 通过scope指定是否设置为单例
-			// 获取代理对象
+			// 从二级/三级缓存里获取实例
 			exposedObject = getSingleton(beanName);
 			registerSingleton(beanName, exposedObject);
 		}

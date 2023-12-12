@@ -6,9 +6,8 @@ import org.eintr.springframework.stereotype.Component;
 
 @Component("B")
 public class B {
-    public A a;
+    private A a;
 
     public B() {
-        this.a = new A();
     }
 }
