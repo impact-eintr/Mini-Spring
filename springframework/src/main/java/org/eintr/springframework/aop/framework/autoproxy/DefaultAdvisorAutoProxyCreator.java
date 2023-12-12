@@ -54,8 +54,8 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
     }
 
     @Override
-    public PropertyValues postProcessPropertyValues(PropertyValues propertyValues, Object bean, String beanName) throws BeansException {
-        return propertyValues;
+    public PropertyValues postProcessPropertyValues(Object bean, String beanName) throws BeansException {
+        return null; // FIXME 返回原值干嘛
     }
 
     private boolean isInfrastuctureClass(Class<?> beanClass) {
@@ -93,7 +93,7 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
 
     @Override
     public Object getEarlyBeanReference(Object bean, String beanName) {
-        earlyProxyReferences.add(beanName);
-        return wrapIfNecessary(bean, beanName);
+        earlyProxyReferences.add(beanName); // 未构造结束的切面（其实就是准备实现接口的对象实例）
+        return wrapIfNecessary(bean, beanName); // 没被拦截的对象会直接原样离开 拦截下来的会注册对应信息
     }
 }

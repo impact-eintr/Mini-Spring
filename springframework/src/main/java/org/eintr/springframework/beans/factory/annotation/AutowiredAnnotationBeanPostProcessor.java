@@ -2,6 +2,7 @@ package org.eintr.springframework.beans.factory.annotation;
 
 import cn.hutool.core.bean.BeanUtil;
 import org.eintr.springframework.beans.BeansException;
+import org.eintr.springframework.beans.PropertyValue;
 import org.eintr.springframework.beans.PropertyValues;
 import org.eintr.springframework.beans.factory.BeanFactory;
 import org.eintr.springframework.beans.factory.BeanFactoryAware;
@@ -39,7 +40,8 @@ public class AutowiredAnnotationBeanPostProcessor implements InstantiationAwareB
     }
 
     @Override
-    public PropertyValues postProcessPropertyValues(PropertyValues propertyValues, Object bean, String beanName) throws BeansException {
+    public PropertyValues postProcessPropertyValues(Object bean, String beanName) throws BeansException {
+        PropertyValues propertyValues = new PropertyValues();
         Class<?> clazz = bean.getClass();
         clazz = ClassUtils.isCglibProxyClass(clazz) ? clazz.getSuperclass() : clazz;
         Field[] declaredFields = clazz.getDeclaredFields();
@@ -50,6 +52,8 @@ public class AutowiredAnnotationBeanPostProcessor implements InstantiationAwareB
                 String value = valueAnnotation.value();
                 value = beanFactory.resolveEmbeddedValueResolver(value);
                 BeanUtil.setFieldValue(bean, field.getName(), value);
+                // NOTE 添加到 pvs
+                propertyValues.addPropertyValue(new PropertyValue(field.getName(), value));
             }
         }
 
@@ -57,7 +61,6 @@ public class AutowiredAnnotationBeanPostProcessor implements InstantiationAwareB
         for (Field field : declaredFields) {
             Autowired autowiredAnnotation = field.getAnnotation(Autowired.class);
             if (null != autowiredAnnotation) {
-                System.out.println("@Autowired");
                 Class<?> fieldType = field.getType();
                 String dependentBeanName = null;
                 Qualifier qualifierAnnotation = field.getAnnotation(Qualifier.class);
@@ -69,6 +72,8 @@ public class AutowiredAnnotationBeanPostProcessor implements InstantiationAwareB
                     dependentBean = beanFactory.getBean(fieldType);
                 }
                 BeanUtil.setFieldValue(bean, field.getName(), dependentBean);
+                propertyValues.addPropertyValue(
+                        new PropertyValue(field.getName(), dependentBean));
             }
         }
         return propertyValues;

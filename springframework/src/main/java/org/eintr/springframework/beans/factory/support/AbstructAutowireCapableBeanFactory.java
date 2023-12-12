@@ -31,12 +31,11 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 		try {
 			bean = createBeanInstance(beanDefinition, beanName, args);
 
-			// 处理循环依赖 创建完实例后 存放在二级缓存 用于暴露该对象
+			// 处理循环依赖 创建完实例后 存放在三级缓存 用于暴露该对象
 			if (beanDefinition.isSingleton()) {
 				Object finalBean = bean;
-				// 先添加到二级缓存(暴露这个半成品)
-				addEarlySingletonObjects(beanName, finalBean);
-				// TODO addSingletonFactory(beanName, () -> getEarlyBeanReference(beanName, beanDefinition, finalBean));
+				// 先添加至三级缓存
+				addSingletonFactory(beanName, () -> this.getEarlyBeanReference(beanName, beanDefinition, finalBean));
 			}
 
 			// 构造完对象后再次判断是否是使用了 AOP 代理的接口
@@ -106,8 +105,7 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 			if (processor instanceof InstantiationAwareBeanPostProcessor) {
 				// 没有在xml中配置的属性 不会有值 也不属于BeanDefinition的属性 需要添加@Value的注解
 				PropertyValues propertyValues = ((InstantiationAwareBeanPostProcessor)processor)
-						.postProcessPropertyValues(beanDefinition.getPropertyValues(),
-								bean,  beanName);
+						.postProcessPropertyValues(bean,  beanName);
 				if (null != propertyValues) {
 					for (PropertyValue propertyValue : propertyValues.getPropertyValues()) {
 						beanDefinition.getPropertyValues().addPropertyValue(propertyValue);

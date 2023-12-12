@@ -3,10 +3,15 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/context ">
 
-    <bean id="A" class="org.eintr.springframework.test.bean.A" scope="prototype"/>
-    <bean id="B" class="org.eintr.springframework.test.bean.B" scope="prototype"/>
-
     <!--
+    <bean id="A" class="org.eintr.springframework.test.bean.A">
+        <property name="bAttr" ref="B"/>
+    </bean>
+    <bean id="B" class="org.eintr.springframework.test.bean.B">
+        <property name="aAttr" ref="A"/>
+    </bean>
+    -->
+
     <bean id="interceptor" class="org.eintr.springframework.test.bean.UserServiceInterceptor"/>
 
     <bean id="pointcutAdvisor" class="org.eintr.springframework.aop.aspectj.AspectJExpressionPointcutAdvisor">
@@ -15,11 +20,12 @@
     </bean>
 
     <context:component-scan base-package="org.eintr.springframework.test.bean"/>
+    <!--
     <context:component-scan base-package="org.eintr.springframework.test.event"/>
     <bean class="org.eintr.springframework.beans.factory.PropertyPlaceholderConfigurer">
         <property name="location" value="classpath:token.properties"/>
     </bean>
-    context:component-scan base-package="org.eintr.springframework.test.common"/>
+    <context:component-scan base-package="org.eintr.springframework.test.common"/>
     -->
 
 </beans>

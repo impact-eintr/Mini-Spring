@@ -18,14 +18,14 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 	// 二级缓存(解决循环依赖的关键) 提前暴露对象 没有完全实例化的对象
 	private final Map<String, Object> earlySingletonObjects = new HashMap<String, Object>();
 	// 三级缓存 存放代理对象
-	//private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<String, ObjectFactory<?>>();
+	private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<String, ObjectFactory<?>>();
 
 	// BeanFactory 所有的销毁机制
 	private final Map<String, DisposableBean> disposableBeans = new LinkedHashMap<>();
 
 	protected void addSingletonFactory(String beanName, ObjectFactory<?> factory) {
 		if (!singletonObjects.containsKey(beanName)) { // 检查一级缓存
-			//this.singletonFactories.put(beanName, factory); // 添加至三级缓存
+			this.singletonFactories.put(beanName, factory); // 添加至三级缓存
 			this.earlySingletonObjects.remove(beanName);
 		}
 	}
@@ -43,14 +43,15 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 		if (null == singletonObject) { // 检查二级缓存
 			singletonObject = earlySingletonObjects.get(beanName);
 			if (null == singletonObject) { //检查三级缓存
-			/* TODO 加入三级缓存
 				ObjectFactory<?> singleFactory = singletonFactories.get(beanName);
 				if (null != singleFactory) {
-					singletonObject = singleFactory.getObject(); // 构造对象
+					// 调用 getEarlyBeanReference(beanName, beanDefinition, finalBean)
+					// 对于代理对象 返回的是代理
+					// 对于普通对象 返回的是实例
+					singletonObject = singleFactory.getObject();
 					earlySingletonObjects.put(beanName, singletonObject); // 将真实的对象存放进二级缓存
 					singletonFactories.remove(beanName); // 移除三级缓存中的对象
 				}
-			*/
 			}
 		}
 		return singletonObject;
@@ -60,7 +61,7 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 	public void registerSingleton(String beanName, Object singletonObject) {
 		singletonObjects.put(beanName, singletonObject);
 		earlySingletonObjects.remove(beanName);
-		//TODO singletonFactories.remove(beanName);
+		singletonFactories.remove(beanName);
 	}
 
 	public void registerDisposableBean(String beanName, DisposableBean bean) {
