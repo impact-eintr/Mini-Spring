@@ -35,7 +35,7 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 			if (beanDefinition.isSingleton()) {
 				Object finalBean = bean;
 				// 先添加至三级缓存
-				addSingletonFactory(beanName, () -> AbstructAutowireCapableBeanFactory.this.getEarlyBeanReference(beanName, beanDefinition, finalBean));
+				addSingletonFactory(beanName, () -> getEarlyBeanReference(beanName, beanDefinition, finalBean));
 			}
 
 			// 构造完对象后再次判断是否是使用了 AOP 代理的接口
