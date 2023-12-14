@@ -37,9 +37,9 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
     // TODO spring默认实现AOP的逻辑
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        if (!earlyProxyReferences.contains(beanName)) {
-            return wrapIfNecessary(bean, beanName);
-        }
+        //if (!earlyProxyReferences.contains(beanName)) {
+        //    earlyProxyReferences.add(beanName);
+        //}
         return bean;
     }
 
@@ -93,7 +93,6 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
 
     @Override
     public Object getEarlyBeanReference(Object bean, String beanName) {
-        earlyProxyReferences.add(beanName); // 未构造结束的切面（其实就是准备实现接口的对象实例）
-        return wrapIfNecessary(bean, beanName); // 没被拦截的对象会直接原样离开 拦截下来的会注册对应信息
+        return wrapIfNecessary(bean, beanName);
     }
 }

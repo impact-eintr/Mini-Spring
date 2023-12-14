@@ -31,12 +31,6 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 	}
 
 
-	protected void addEarlySingletonObjects(String beanName, Object bean) {
-		if (!singletonObjects.containsKey(beanName)) { // 检查一级缓存
-			this.earlySingletonObjects.put(beanName, bean);
-		}
-	}
-
 	@Override
 	public Object getSingleton(String beanName) {
 		Object singletonObject = singletonObjects.get(beanName);

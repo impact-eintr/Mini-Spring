@@ -35,12 +35,7 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 			if (beanDefinition.isSingleton()) {
 				Object finalBean = bean;
 				// 先添加至三级缓存
-				addSingletonFactory(beanName, new ObjectFactory<Object>() {
-                    @Override
-                    public Object getObject() throws BeansException {
-                        return AbstructAutowireCapableBeanFactory.this.getEarlyBeanReference(beanName, beanDefinition, finalBean);
-                    }
-                });
+				addSingletonFactory(beanName, () -> AbstructAutowireCapableBeanFactory.this.getEarlyBeanReference(beanName, beanDefinition, finalBean));
 			}
 
 			// 构造完对象后再次判断是否是使用了 AOP 代理的接口
@@ -68,6 +63,7 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 		if (beanDefinition.isSingleton()) { // 通过scope指定是否设置为单例
 			// 从二级/三级缓存里获取实例
 			exposedObject = getSingleton(beanName);
+			// 移除二三级缓存的实例到一级缓存
 			registerSingleton(beanName, exposedObject);
 		}
 		return exposedObject;
@@ -80,7 +76,7 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 			if (beanPostProcessor instanceof InstantiationAwareBeanPostProcessor) {
 				exposedObject = ((InstantiationAwareBeanPostProcessor)beanPostProcessor).
 						getEarlyBeanReference(bean, beanName);
-				if (null != exposedObject) {
+				if (null == exposedObject) {
 					return exposedObject;
 				}
 			}

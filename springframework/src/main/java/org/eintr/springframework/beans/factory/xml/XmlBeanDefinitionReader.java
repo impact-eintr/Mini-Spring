@@ -62,11 +62,6 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		Document document = (Document) reader.read(inputStream);
 		Element root = document.getRootElement();
 
-		// 默认实现AOP
-		getRegistry().registerBeanDefinition(
-				StrUtil.lowerFirst(DefaultAdvisorAutoProxyCreator.class.getSimpleName()),
-				new BeanDefinition(DefaultAdvisorAutoProxyCreator.class));
-
 		// 解析 context:component-scan 标签，扫描包中的类并提取相关信息，用于组装 BeanDefinition
 		List<Element> components = root.elements("component-scan");
 		for (Element component : components) {
@@ -78,6 +73,11 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 				scanPackage(scanPath);
 			}
 		}
+
+		// 默认实现AOP
+		getRegistry().registerBeanDefinition(
+				StrUtil.lowerFirst(DefaultAdvisorAutoProxyCreator.class.getSimpleName()),
+				new BeanDefinition(DefaultAdvisorAutoProxyCreator.class));
 
 
 		List<Element> beanList = root.elements("bean");
