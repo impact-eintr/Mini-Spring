@@ -3,26 +3,21 @@ package org.eintr.springframework.aop.framework.autoproxy;
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.eintr.springframework.aop.*;
-import org.eintr.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.eintr.springframework.aop.aspectj.AspectJExpressionPointcutAdvisor;
 import org.eintr.springframework.aop.framework.ProxyFactory;
 import org.eintr.springframework.beans.BeansException;
-import org.eintr.springframework.beans.PropertyValue;
 import org.eintr.springframework.beans.PropertyValues;
 import org.eintr.springframework.beans.factory.BeanFactory;
 import org.eintr.springframework.beans.factory.BeanFactoryAware;
 import org.eintr.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.eintr.springframework.beans.factory.support.DefaultListableBeanFactory;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPostProcessor, BeanFactoryAware {
     private DefaultListableBeanFactory beanFactory;
 
-    private final Set<Object> earlyProxyReferences = Collections.synchronizedSet(new HashSet<Object>());
+    private final Map<String, Object> earlyProxyReferences = Collections.synchronizedMap(new HashMap<String, Object>());
 
     @Override
     public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
@@ -37,10 +32,7 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
     // TODO spring默认实现AOP的逻辑
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        //if (!earlyProxyReferences.contains(beanName)) {
-        //    earlyProxyReferences.add(beanName);
-        //}
-        return bean;
+        return wrapIfNecessary(bean, beanName);
     }
 
     @Override
@@ -78,6 +70,7 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
             if (!classFilter.matches(beanClass)) {
                 continue;
             }
+
             AdvisedSupport advisedSupport = new AdvisedSupport();
             TargetSource targetSource = new TargetSource(bean);
             advisedSupport.setTargetSource(targetSource);
@@ -85,14 +78,21 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
             advisedSupport.setMethodMatcher(advisor.getPointcut().getMethodMatcher());
             advisedSupport.setProxyTargetClass(false);
 
-            System.out.println("============SPRING AOP 将使用用户自定义的 方法代理 构造实例========");
-            return new ProxyFactory(advisedSupport).getProxy();
+            Object exposedBean = new ProxyFactory(advisedSupport).getProxy();
+            if (!earlyProxyReferences.containsKey(beanName)) { // 缓存
+                System.out.println("============SPRING AOP 将使用用户自定义的 方法代理 构造实例========");
+                earlyProxyReferences.put(beanName, exposedBean);
+            }
+            return exposedBean;
         }
         return bean;
     }
 
     @Override
     public Object getEarlyBeanReference(Object bean, String beanName) {
-        return wrapIfNecessary(bean, beanName);
+        if (earlyProxyReferences.containsKey(beanName)) { //hit cache
+            return earlyProxyReferences.get(beanName); // AOP代理对象
+        }
+        return bean; // 普通对象
     }
 }
