@@ -3,7 +3,6 @@ package org.eintr.springframework.beans.factory.support;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.TypeUtil;
-import org.eintr.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.eintr.springframework.beans.BeansException;
 import org.eintr.springframework.beans.PropertyValue;
 import org.eintr.springframework.beans.PropertyValues;
@@ -14,7 +13,6 @@ import org.eintr.springframework.core.convert.support.DefaultConversionService;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.Iterator;
 
 public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFactory implements AutowireCapableBeanFactory {
 

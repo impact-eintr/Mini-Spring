@@ -12,7 +12,10 @@ import org.eintr.springframework.beans.factory.BeanFactoryAware;
 import org.eintr.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.eintr.springframework.beans.factory.support.DefaultListableBeanFactory;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPostProcessor, BeanFactoryAware {
     private DefaultListableBeanFactory beanFactory;
