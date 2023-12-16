@@ -3,29 +3,29 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/context ">
 
+    <bean class="org.eintr.springframework.beans.factory.PropertyPlaceholderConfigurer">
+        <property name="location" value="classpath:token.properties"/>
+    </bean>
+
+    <bean id="conversionService" class="org.eintr.springframework.context.support.ConversionServiceFactoryBean"/>
+
+    <context:component-scan base-package="org.eintr.springframework.test.bean"/>
+    <context:component-scan base-package="org.eintr.springframework.test.event"/>
+    <context:component-scan base-package="org.eintr.springframework.test.common"/>
+    <bean id="interceptor" class="org.eintr.springframework.test.bean.UserServiceInterceptor"/>
+    <bean id="pointcutAdvisor" class="org.eintr.springframework.aop.aspectj.AspectJExpressionPointcutAdvisor">
+        <property name="expression" value="execution(* org.eintr.springframework.test.bean.IUserService.*(..))"/>
+        <property name="advice" ref="interceptor"/>
+    </bean>
+
     <!--
+    <bean id="converters" class="org.eintr.springframework.test.converter.ConvertersFactoryBean"/>
     <bean id="A" class="org.eintr.springframework.test.bean.A">
         <property name="bAttr" ref="B"/>
     </bean>
     <bean id="B" class="org.eintr.springframework.test.bean.B">
         <property name="aAttr" ref="A"/>
     </bean>
-    -->
-
-    <bean id="interceptor" class="org.eintr.springframework.test.bean.UserServiceInterceptor"/>
-
-    <bean id="pointcutAdvisor" class="org.eintr.springframework.aop.aspectj.AspectJExpressionPointcutAdvisor">
-        <property name="expression" value="execution(* org.eintr.springframework.test.bean.IUserService.*(..))"/>
-        <property name="advice" ref="interceptor"/>
-    </bean>
-
-    <context:component-scan base-package="org.eintr.springframework.test.bean"/>
-    <!--
-    <context:component-scan base-package="org.eintr.springframework.test.event"/>
-    <bean class="org.eintr.springframework.beans.factory.PropertyPlaceholderConfigurer">
-        <property name="location" value="classpath:token.properties"/>
-    </bean>
-    <context:component-scan base-package="org.eintr.springframework.test.common"/>
     -->
 
 </beans>

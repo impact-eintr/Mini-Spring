@@ -13,6 +13,8 @@ import org.eintr.springframework.aop.framework.ProxyFactory;
 import org.eintr.springframework.aop.framework.ReflectiveMethodInvocation;
 import org.eintr.springframework.aop.framework.adapter.MethodBeforeAdviceInterceptor;
 import org.eintr.springframework.context.support.ClassPathXmlApplicationContext;
+import org.eintr.springframework.core.convert.converter.Converter;
+import org.eintr.springframework.core.convert.support.StringToNumberConverterFactory;
 import org.eintr.springframework.test.bean.*;
 import org.eintr.springframework.test.event.CustomEvent;
 import org.junit.Test;
@@ -35,6 +37,17 @@ public class ApiTest {
 		IUserService userService = applicationContext.getBean("userService", IUserService.class);
 		String result = userService.queryUserInfo("AAA");
 		System.out.println("测试结果：" + result);
+	}
+
+	@Test
+	public void test_StringToNumberConverterFactory() {
+		StringToNumberConverterFactory converterFactory = new StringToNumberConverterFactory();
+
+		Converter<String, Integer> stringToIntegerConverter = converterFactory.getConverter(Integer.class);
+		System.out.println("测试结果：" + stringToIntegerConverter.convert("1234"));
+
+		Converter<String, Long> stringToLongConverter = converterFactory.getConverter(Long.class);
+		System.out.println("测试结果：" + stringToLongConverter.convert("1234"));
 	}
 
 

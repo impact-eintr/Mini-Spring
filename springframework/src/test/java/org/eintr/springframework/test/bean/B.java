@@ -4,7 +4,6 @@ import org.eintr.springframework.beans.factory.annotation.Autowired;
 import org.eintr.springframework.beans.factory.annotation.Qualifier;
 import org.eintr.springframework.stereotype.Component;
 
-@Component("B")
 public class B {
     @Autowired
     //@Qualifier("A")

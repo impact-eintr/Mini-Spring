@@ -79,7 +79,6 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 				StrUtil.lowerFirst(DefaultAdvisorAutoProxyCreator.class.getSimpleName()),
 				new BeanDefinition(DefaultAdvisorAutoProxyCreator.class));
 
-
 		List<Element> beanList = root.elements("bean");
 		for (Element bean : beanList) {
 

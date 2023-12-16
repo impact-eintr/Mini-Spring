@@ -1,6 +1,7 @@
 package org.eintr.springframework.beans.factory.config;
 
 import org.eintr.springframework.beans.factory.HierarchicalBeanFactory;
+import org.eintr.springframework.core.convert.ConversionService;
 import org.eintr.springframework.util.StringValueResolver;
 
 // 可继承 可单例
@@ -13,4 +14,8 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	void destroySingletons();
 	void addEmbeddedValueResolver(StringValueResolver valueResolver);
 	String resolveEmbeddedValueResolver(String value);
+
+	void setConversionService(ConversionService conversionService);
+
+	ConversionService getConversionService();
 }

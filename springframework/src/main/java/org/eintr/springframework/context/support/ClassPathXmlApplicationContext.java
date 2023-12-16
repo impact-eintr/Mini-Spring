@@ -27,4 +27,9 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
     protected String[] getConfigLocations() {
         return configLocations;
     }
+
+    @Override
+    public boolean containsBean(String name) {
+        return getBeanFactory().containsBean(name);
+    }
 }

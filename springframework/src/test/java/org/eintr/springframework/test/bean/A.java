@@ -2,14 +2,17 @@ package org.eintr.springframework.test.bean;
 
 import org.eintr.springframework.beans.factory.annotation.Autowired;
 import org.eintr.springframework.beans.factory.annotation.Qualifier;
+import org.eintr.springframework.beans.factory.annotation.Value;
 import org.eintr.springframework.stereotype.Component;
 
 
-@Component("A")
 public class A {
     @Autowired
     //@Qualifier("B")
     private B bAttr;
+
+    @Value("333")
+    public int Id;
 
     public A() {
     }

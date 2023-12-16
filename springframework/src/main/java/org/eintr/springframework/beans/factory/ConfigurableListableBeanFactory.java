@@ -9,5 +9,4 @@ import org.eintr.springframework.beans.factory.config.BeanDefinition;
 public interface ConfigurableListableBeanFactory extends ListableBeanFactoty, AutowireCapableBeanFactory, ConfigurableBeanFactory {
 	BeanDefinition getBeanDefinition(String beanName) throws BeansException;
 	void preInstantiateSingletons() throws BeansException;
-
 }

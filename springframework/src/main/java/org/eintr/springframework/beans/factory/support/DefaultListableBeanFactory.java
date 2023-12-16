@@ -29,6 +29,11 @@ public class DefaultListableBeanFactory extends AbstructAutowireCapableBeanFacto
 	}
 
 	@Override
+	protected boolean containsBeanDefination(String name) {
+		return beanDefinitionMap.containsKey(name);
+	}
+
+	@Override
 	public void preInstantiateSingletons() throws BeansException {
 		for (String beanName : beanDefinitionMap.keySet()) {
 			BeanDefinition beanDefinition = beanDefinitionMap.get(beanName);

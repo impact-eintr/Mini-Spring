@@ -5,6 +5,7 @@ import org.eintr.springframework.beans.factory.FactoryBean;
 import org.eintr.springframework.beans.factory.config.BeanDefinition;
 import org.eintr.springframework.beans.factory.config.BeanPostProcessor;
 import org.eintr.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.eintr.springframework.core.convert.ConversionService;
 import org.eintr.springframework.util.ClassUtils;
 import org.eintr.springframework.util.StringValueResolver;
 
@@ -20,6 +21,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 	private final List<StringValueResolver> embeddedValueResolvers = new ArrayList<>();
 
+	private ConversionService conversionService;
 	// 获取Bean
 	@Override
 	public Object getBean(String name) throws BeansException {
@@ -82,6 +84,21 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		}
 		return result;
 	}
+
+
+	public void setConversionService(ConversionService conversionService){
+		this.conversionService = conversionService;
+	}
+
+	public ConversionService getConversionService() {
+		return conversionService;
+	}
+
+	public boolean containsBean(String name) {
+		return containsBeanDefination(name);
+	}
+
+	protected abstract boolean containsBeanDefination(String name);
 
 	public List<BeanPostProcessor> getBeanPostProcessors() {
 		// ApplicationContextAwarePorcessor    1. 容器感知处理器

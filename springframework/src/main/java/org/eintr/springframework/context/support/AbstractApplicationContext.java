@@ -15,6 +15,7 @@ import org.eintr.springframework.context.event.ApplicationEventMulticaster;
 import org.eintr.springframework.context.event.ContextClosedEvent;
 import org.eintr.springframework.context.event.ContextRefreshedEvent;
 import org.eintr.springframework.context.event.SimpleApplicationEventMulticaster;
+import org.eintr.springframework.core.convert.ConversionService;
 import org.eintr.springframework.core.io.DefaultResourceLoader;
 import org.w3c.dom.Element;
 
@@ -98,10 +99,23 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
 
         registerListeners();// 初始化事件监听器
 
-        // 提前实例化除了 BeanFactoryPostProcessor 以及 BeanPostProcessor 的单例Bean对象
-        beanFactory.preInstantiateSingletons();
+        // 设置类型转换器、提前实例化单例Bean对象
+        finishBeanFactoryInitialization(beanFactory);
 
         finishRefresh(); // 发布容器 刷新完成事件
+    }
+
+    // 设置类型转换器、提前实例化单例Bean对象
+    protected void finishBeanFactoryInitialization(ConfigurableListableBeanFactory beanFactory) {
+        // 设置类型转换器
+        if (beanFactory.containsBean("conversionService")) {
+            Object conversionService = beanFactory.getBean("conversionService");
+            if (conversionService instanceof ConversionService) {
+                beanFactory.setConversionService((ConversionService) conversionService);
+            }
+        }
+        // 提前实例化单例Bean对象
+        beanFactory.preInstantiateSingletons();
     }
 
 

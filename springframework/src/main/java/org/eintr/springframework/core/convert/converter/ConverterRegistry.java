@@ -6,5 +6,5 @@ public interface ConverterRegistry {
 
     void addConverter(GenericConverter converter);
 
-    void addConvertFactory(ConverterFactory<?, ?> converterFactory);
+    void addConverterFactory(ConverterFactory<?, ?> converterFactory);
 }

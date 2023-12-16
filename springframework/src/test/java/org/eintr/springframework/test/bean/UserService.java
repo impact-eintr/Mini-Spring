@@ -8,7 +8,7 @@ public class UserService implements IUserService {
 
 	@Value("天津")
 	private String location;
-
+	private String Language;
 	private IUserDao userDao;
 
 

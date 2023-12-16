@@ -2,12 +2,15 @@ package org.eintr.springframework.beans.factory.support;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.TypeUtil;
 import org.eintr.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.eintr.springframework.beans.BeansException;
 import org.eintr.springframework.beans.PropertyValue;
 import org.eintr.springframework.beans.PropertyValues;
 import org.eintr.springframework.beans.factory.*;
 import org.eintr.springframework.beans.factory.config.*;
+import org.eintr.springframework.core.convert.ConversionService;
+import org.eintr.springframework.core.convert.support.DefaultConversionService;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -153,10 +156,9 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 		Constructor<?>[] declaredConstructors = beanClass.getDeclaredConstructors();
 		for (Constructor ctor : declaredConstructors)
             if (null != args && ctor.getParameterTypes().length == args.length) {
-                // TODO 处理一下不同类型
                 int i = 0;
                 boolean flag = true;
-                for (Class<?> clazz : ctor.getParameterTypes()) { // FIXME 处理自动装箱
+                for (Class<?> clazz : ctor.getParameterTypes()) {
                     if (!args[i].getClass().equals(clazz)) {
                         flag = false;
                         break;
@@ -184,10 +186,19 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 					// A 依赖 B 先获取B的实例
 					BeanReference beanReference = (BeanReference) value;
 					value = getBean(beanReference.getBeanName());
+				} else { // 类型转换
+					Class<?> sourceType = value.getClass();
+					Class<?> targetType = (Class<?>) TypeUtil.getFieldType(bean.getClass(), name);
+					ConversionService conversionService = new DefaultConversionService();
+					if (conversionService != null) {
+						if (conversionService.canConvert(sourceType, targetType)) {
+							value = conversionService.convert(value, targetType);
+						}
+					}
+
 				}
 				BeanUtil.setFieldValue(bean, name, value);
 			}
-
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new BeansException("Error setting property values: "+beanName);
@@ -223,7 +234,6 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 			throw new BeansException("Invocation of init method of bean[" +
 					beanName + "] failed", e);
 		}
-
 		// 在填充完属性值后 构造对象
 		wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
 		return wrappedBean;

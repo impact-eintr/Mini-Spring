@@ -8,4 +8,6 @@ public interface BeanFactory {
 	// 根据类型获取bean
 	<T> T getBean(String name, Class<T> requiredType) throws BeansException;
 	<T> T getBean(Class<T> requiredType) throws BeansException;
+
+	boolean containsBean(String name);
 }
