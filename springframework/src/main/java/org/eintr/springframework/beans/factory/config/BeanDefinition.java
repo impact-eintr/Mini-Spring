@@ -19,6 +19,9 @@ public class BeanDefinition {
 
 	private boolean prototype = false;
 
+	//是否是Controller注解
+	private  boolean isController = false;
+
 	public BeanDefinition(Class beanClass) {
 		this.beanClass = beanClass;
 		this.propertyValues = new PropertyValues();
@@ -72,5 +75,13 @@ public class BeanDefinition {
 
 	public boolean isSingleton() {
 		return singleton;
+	}
+
+	public boolean isController() {
+		return isController;
+	}
+
+	public void setIsController(boolean controller) {
+		this.isController = controller;
 	}
 }

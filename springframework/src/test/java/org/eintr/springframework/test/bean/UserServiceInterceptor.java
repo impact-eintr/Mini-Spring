@@ -2,7 +2,6 @@ package org.eintr.springframework.test.bean;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.eintr.springframework.stereotype.Component;
 
 public class UserServiceInterceptor implements MethodInterceptor {
     @Override

@@ -6,20 +6,32 @@ import org.eintr.springframework.beans.factory.ConfigurableListableBeanFactory;
 import org.eintr.springframework.beans.factory.config.BeanDefinition;
 import org.eintr.springframework.beans.factory.config.BeanPostProcessor;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class DefaultListableBeanFactory extends AbstructAutowireCapableBeanFactory implements BeanDefinitionRegistry, ConfigurableListableBeanFactory {
 	private final Map<String, BeanDefinition> beanDefinitionMap = new HashMap<>();
+	private final Map<String, BeanDefinition> aspectBeanDefinitionMap = new HashMap<>();
 
 	// 注册一个BeanDefinition
 	public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition) {
 		beanDefinitionMap.put(beanName, beanDefinition);
 	}
 
+	@Override
+	public void registerAspect(String beanName, BeanDefinition beanDefinition) {
+		aspectBeanDefinitionMap.put(beanName, beanDefinition);
+	}
+
+	public <T> Map<String, T> getBeansOfAspect(Class<T> type) throws BeansException {
+		Map<String, T> result = new HashMap<>();
+		aspectBeanDefinitionMap.forEach((beanName, beanDefinition)->{
+			result.put(beanName, (T)getBean(beanName));
+		});
+		return result;
+	}
+
 	// 使用Beanc查询BeanDefinition
+	@Override
 	public BeanDefinition getBeanDefinition(String beanName) throws BeanException {
 		BeanDefinition beanDefinition = beanDefinitionMap.get(beanName);
 		if (beanDefinition == null) {

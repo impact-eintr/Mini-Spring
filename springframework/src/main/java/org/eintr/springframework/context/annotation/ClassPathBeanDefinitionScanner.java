@@ -1,12 +1,24 @@
 package org.eintr.springframework.context.annotation;
 
 import cn.hutool.core.util.StrUtil;
-import org.eintr.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
+import org.eintr.springframework.annotation.aop.Aspect;
+import org.eintr.springframework.annotation.aop.PointCut;
+import org.eintr.springframework.annotation.context.Scope;
+import org.eintr.springframework.annotation.stereotype.Controller;
+import org.eintr.springframework.annotation.stereotype.Repository;
+import org.eintr.springframework.annotation.stereotype.Service;
+import org.eintr.springframework.aop.MethodNode;
+import org.eintr.springframework.aop.aspect.AspectMethodPointcut;
+import org.eintr.springframework.aop.aspect.AspectMethodPointcutAdvisor;
+import org.eintr.springframework.aop.aspect.AspectPointcutAdvisor;
+import org.eintr.springframework.beans.PropertyValue;
 import org.eintr.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.eintr.springframework.beans.factory.config.BeanDefinition;
 import org.eintr.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.eintr.springframework.stereotype.Component;
+import org.eintr.springframework.annotation.stereotype.Component;
+import org.eintr.springframework.util.AspectUtils;
 
+import java.lang.reflect.Method;
 import java.util.Set;
 
 public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateComponentProvider { // 访问者模式
@@ -24,13 +36,58 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
                 if (StrUtil.isNotEmpty(beanScope)) {
                     beanDefinition.setScope(beanScope);
                 }
-                System.out.println("扫描"+determineBeanName(beanDefinition));
-                registry.registerBeanDefinition(determineBeanName(beanDefinition), beanDefinition);
+
+                if (!resolveAspect(determineBeanName(beanDefinition), beanDefinition)) {
+                    registry.registerBeanDefinition(determineBeanName(beanDefinition), beanDefinition);
+                }
             }
         }
         registry.registerBeanDefinition(
                 StrUtil.lowerFirst(AutowiredAnnotationBeanPostProcessor.class.getName()),
                 new BeanDefinition(AutowiredAnnotationBeanPostProcessor.class));
+    }
+
+    private boolean resolveAspect(String beanName, BeanDefinition beanDefinition) {
+        boolean aspect = false;
+        Class<?> clazz = beanDefinition.getBeanClass();
+        if (clazz.isAnnotationPresent(Aspect.class)) {
+            for (Method method : clazz.getMethods()) {
+                String annotationPath = "";
+
+                //判断哪一个方法是切入点表达式的注解
+                //like this:@PointCut("com.xichuan.dev.aop.service.StudentAopServiceImpl.study()")
+                if (method.isAnnotationPresent(PointCut.class)) {
+                    String delegateString = method.getAnnotation(PointCut.class).value();
+                    annotationPath = delegateString;
+                    //切点是方法
+                    if (delegateString.charAt(delegateString.length() - 1) == ')') {
+                        annotationPath = annotationPath.replace("()","");
+                        String[] seg = AspectUtils.cutName(annotationPath);
+
+                        BeanDefinition beanDefinition1 = new BeanDefinition(AspectMethodPointcutAdvisor.class);
+                        beanDefinition1.getPropertyValues().addPropertyValue(new PropertyValue("aopClass", seg[0]));
+                        beanDefinition1.getPropertyValues().addPropertyValue(new PropertyValue("methodName", seg[1]));
+                        registry.registerBeanDefinition(beanName, beanDefinition1);
+                        aspect = true;
+                        break;
+                        //切点是某个包或者类
+                    }else {
+                        /*
+                        registry.registerBeanDefinition(beanName,
+                                new BeanDefinition(AspectPointcutAdvisor.class));
+                        //判断
+                        URL url = BeanContainer.classLoader.getResource(basePackage.replace(".","/"));
+                        //切点是class或者package,从file中加载
+                        if (url.getProtocol().equals("file")){
+                            addClassAndPackageAspectFromFile(clazz,annotationPath);
+                        }else if (url.getProtocol().equals("jar")){   //切点是class或者package,从jar中加载
+                            addClassAndPackageAspectFromJar(clazz,annotationPath);
+                        }*/
+                    }
+                }
+            }
+        }
+        return aspect;
     }
 
     private String resolveBeanScope(BeanDefinition beanDefinition) {
@@ -40,13 +97,28 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
         return StrUtil.EMPTY;
     }
 
+    private String getAnnotationValueFromBeanClass(Class<?> beanClass) {
+        Component component = beanClass.getAnnotation(Component.class);
+        Controller controller = beanClass.getAnnotation(Controller.class);
+        Service service = beanClass.getAnnotation(Service.class);
+        Repository repository = beanClass.getAnnotation(Repository.class);
+
+        String value = StrUtil.lowerFirst(beanClass.getSimpleName());
+        if (null != component && !StrUtil.isEmpty(component.value())) {
+            value = component.value();
+        } else if (null != controller && !StrUtil.isEmpty(controller.value())) {
+            value = controller.value();
+        } else if (null != service && !StrUtil.isEmpty(service.value())) {
+            value = service.value();
+        } else if (null != repository && !StrUtil.isEmpty(repository.value())) {
+            value = repository.value();
+        }
+        return value;
+    }
+
     private String determineBeanName(BeanDefinition beanDefinition) {
         Class<?> beanClass = beanDefinition.getBeanClass();
-        Component component = beanClass.getAnnotation(Component.class);
-        String value = component.value();
-        if (StrUtil.isEmpty(value)) {
-            value = StrUtil.lowerFirst(beanClass.getSimpleName());
-        }
+        String value = getAnnotationValueFromBeanClass(beanClass);
         return value;
     }
 }

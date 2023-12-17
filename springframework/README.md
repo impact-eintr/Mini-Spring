@@ -1,6 +1,5 @@
 # spring framework
 
-
 ```xml
 
 <beans xmlns:context="http://www.springframework.org/schema/context"
@@ -17,7 +16,7 @@
     <context:component-scan base-package="org.eintr.springframework.test.event"/>
     <context:component-scan base-package="org.eintr.springframework.test.common"/>
     <bean id="interceptor" class="org.eintr.springframework.test.bean.UserServiceInterceptor"/>
-    <bean id="pointcutAdvisor" class="org.eintr.springframework.aop.aspectj.AspectJExpressionPointcutAdvisor">
+    <bean id="pointcutAdvisor" class="org.eintr.springframework.aop.aspect.AspectJExpressionPointcutAdvisor">
         <property name="expression" value="execution(* org.eintr.springframework.test.bean.IUserService.*(..))"/>
         <property name="advice" ref="interceptor"/>
     </bean>

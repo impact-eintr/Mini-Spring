@@ -1,4 +1,4 @@
-package org.eintr.springframework.beans.factory.annotation;
+package org.eintr.springframework.annotation.beans;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

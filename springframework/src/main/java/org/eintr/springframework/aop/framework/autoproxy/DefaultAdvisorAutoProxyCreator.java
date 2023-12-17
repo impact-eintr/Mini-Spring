@@ -3,7 +3,6 @@ package org.eintr.springframework.aop.framework.autoproxy;
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.eintr.springframework.aop.*;
-import org.eintr.springframework.aop.aspectj.AspectJExpressionPointcutAdvisor;
 import org.eintr.springframework.aop.framework.ProxyFactory;
 import org.eintr.springframework.beans.BeansException;
 import org.eintr.springframework.beans.PropertyValues;
@@ -12,10 +11,7 @@ import org.eintr.springframework.beans.factory.BeanFactoryAware;
 import org.eintr.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.eintr.springframework.beans.factory.support.DefaultListableBeanFactory;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPostProcessor, BeanFactoryAware {
     private DefaultListableBeanFactory beanFactory;
@@ -29,12 +25,25 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
 
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+
         return bean;
     }
 
     // TODO spring默认实现AOP的逻辑
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+        //if(method.isAnnotationPresent(Before.class)) {
+        //    if(!beforeDelegatedSet.containsKey(key)) {
+        //        beforeDelegatedSet.put(key, new ArrayList<>());
+        //    }
+        //    beforeDelegatedSet.get(key).add(methodNode);
+        //}
+        //if(method.isAnnotationPresent(After.class)) {
+        //    if(!afterDelegatedSet.containsKey(key)) {
+        //        afterDelegatedSet.put(key, new ArrayList<>());
+        //    }
+        //    afterDelegatedSet.get(key).add(methodNode);
+        //}
         return wrapIfNecessary(bean, beanName);
     }
 
@@ -65,10 +74,10 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
             return bean;
         }
         // 对于非拦截器的bean 在beans中找到所有的拦截器
-        Collection<AspectJExpressionPointcutAdvisor> advisors =
-                beanFactory.getBeansOfType(AspectJExpressionPointcutAdvisor.class).values();
+        Collection<PointcutAdvisor> advisors =
+                beanFactory.getBeansOfType(PointcutAdvisor.class).values();
 
-        for (AspectJExpressionPointcutAdvisor advisor : advisors) {
+        for (PointcutAdvisor advisor : advisors) {
             ClassFilter classFilter = advisor.getPointcut().getClassFilter();
             if (!classFilter.matches(beanClass)) {
                 continue;
@@ -88,6 +97,7 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
             }
             return exposedBean;
         }
+
         return bean;
     }
 

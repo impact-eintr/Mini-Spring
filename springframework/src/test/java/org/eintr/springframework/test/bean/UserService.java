@@ -1,7 +1,7 @@
 package org.eintr.springframework.test.bean;
 
-import org.eintr.springframework.beans.factory.annotation.Value;
-import org.eintr.springframework.stereotype.Component;
+import org.eintr.springframework.annotation.beans.Value;
+import org.eintr.springframework.annotation.stereotype.Component;
 
 @Component("userService")
 public class UserService implements IUserService {

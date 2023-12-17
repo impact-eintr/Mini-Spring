@@ -6,7 +6,7 @@ import org.eintr.springframework.beans.PropertyValues;
 import org.eintr.springframework.beans.factory.ConfigurableListableBeanFactory;
 import org.eintr.springframework.beans.factory.config.BeanDefinition;
 import org.eintr.springframework.beans.factory.config.BeanFactoryPostProcessor;
-import org.eintr.springframework.stereotype.Component;
+import org.eintr.springframework.annotation.stereotype.Component;
 
 @Component
 public class MyBeanFactoryPostProcessor implements BeanFactoryPostProcessor {

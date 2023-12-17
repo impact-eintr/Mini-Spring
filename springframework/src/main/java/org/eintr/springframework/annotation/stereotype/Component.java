@@ -1,4 +1,4 @@
-package org.eintr.springframework.stereotype;
+package org.eintr.springframework.annotation.stereotype;
 
 import java.lang.annotation.*;
 

@@ -7,6 +7,8 @@ public interface BeanDefinitionRegistry {
 	// 注册一个BeanDefinition
 	void registerBeanDefinition(String beanName, BeanDefinition beanDefinition) ;
 
+	void registerAspect(String beanName, BeanDefinition beanDefinition) ;
+
 	// 使用Beanc查询BeanDefinition
 	BeanDefinition getBeanDefinition(String beanName) throws BeanException;
 

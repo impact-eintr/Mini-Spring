@@ -1,9 +1,7 @@
 package org.eintr.springframework.test.bean;
 
-import org.eintr.springframework.beans.factory.annotation.Autowired;
-import org.eintr.springframework.beans.factory.annotation.Qualifier;
-import org.eintr.springframework.beans.factory.annotation.Value;
-import org.eintr.springframework.stereotype.Component;
+import org.eintr.springframework.annotation.beans.Autowired;
+import org.eintr.springframework.annotation.beans.Value;
 
 
 public class A {

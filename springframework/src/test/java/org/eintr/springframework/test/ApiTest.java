@@ -6,12 +6,12 @@ import org.eintr.springframework.aop.AdvisedSupport;
 import org.eintr.springframework.aop.ClassFilter;
 import org.eintr.springframework.aop.MethodMatcher;
 import org.eintr.springframework.aop.TargetSource;
-import org.eintr.springframework.aop.aspectj.AspectJExpressionPointcut;
-import org.eintr.springframework.aop.aspectj.AspectJExpressionPointcutAdvisor;
+import org.eintr.springframework.aop.aspect.AspectJExpressionPointcut;
+import org.eintr.springframework.aop.aspect.AspectJExpressionPointcutAdvisor;
 import org.eintr.springframework.aop.framework.JdkDynamicAopProxy;
 import org.eintr.springframework.aop.framework.ProxyFactory;
 import org.eintr.springframework.aop.framework.ReflectiveMethodInvocation;
-import org.eintr.springframework.aop.framework.adapter.MethodBeforeAdviceInterceptor;
+import org.eintr.springframework.aop.framework.adapter.MethodAdviceInterceptor;
 import org.eintr.springframework.context.support.ClassPathXmlApplicationContext;
 import org.eintr.springframework.core.convert.converter.Converter;
 import org.eintr.springframework.core.convert.support.StringToNumberConverterFactory;
@@ -68,7 +68,7 @@ public class ApiTest {
 
 		AspectJExpressionPointcutAdvisor advisor = new AspectJExpressionPointcutAdvisor();
 		advisor.setExpression("execution(* org.eintr.springframework.test.bean.IUserService.*(..))");
-		advisor.setAdvice(new MethodBeforeAdviceInterceptor(new UserServiceAdvice()));
+		advisor.setAdvice(new MethodAdviceInterceptor(new UserServiceAdvice()));
 
 		ClassFilter classFilter = advisor.getPointcut().getClassFilter();
 		if (classFilter.matches(userService.getClass())) {

@@ -1,7 +1,7 @@
 package org.eintr.springframework.test.event;
 
 import org.eintr.springframework.context.ApplicationListener;
-import org.eintr.springframework.stereotype.Component;
+import org.eintr.springframework.annotation.stereotype.Component;
 
 import java.util.Date;
 
