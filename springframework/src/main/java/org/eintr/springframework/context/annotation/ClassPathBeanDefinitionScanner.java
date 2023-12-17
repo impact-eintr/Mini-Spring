@@ -69,13 +69,25 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
                         annotationPath = annotationPath.replace("()","");
                         String[] seg = AspectUtils.cutName(annotationPath);
 
-                        BeanDefinition beanDefinition1 = new BeanDefinition(AspectMethodPointcutAdvisor.class);
-                        beanDefinition1.getPropertyValues().addPropertyValue(new PropertyValue("aopClass", seg[0]));
-                        beanDefinition1.getPropertyValues().addPropertyValue(new PropertyValue("methodName", seg[1]));
-                        beanDefinition1.getPropertyValues().addPropertyValue(
-                                new PropertyValue("advice",
-                                        checkAspect(beanDefinition.getBeanClass(),  true, seg[1])));
-                        registry.registerBeanDefinition(beanName, beanDefinition1);
+                        if (registry.containsBeanDefinition(beanName)) {
+                            BeanDefinition beanDefinition1 = registry.getBeanDefinition(beanName);
+                            beanDefinition1.getPropertyValues().addPropertyValue(
+                                    new PropertyValue("aopClass",
+                                            beanDefinition1.getPropertyValues().
+                                                    getPropertyValue("aopClass").getValue()+","+seg[0]));
+                            beanDefinition1.getPropertyValues().addPropertyValue(
+                                    new PropertyValue("methodName",
+                                            beanDefinition1.getPropertyValues().
+                                                    getPropertyValue("methodName").getValue()+","+seg[1]));
+                        } else {
+                            BeanDefinition beanDefinition1 = new BeanDefinition(AspectMethodPointcutAdvisor.class);
+                            beanDefinition1.getPropertyValues().addPropertyValue(new PropertyValue("aopClass", seg[0]));
+                            beanDefinition1.getPropertyValues().addPropertyValue(new PropertyValue("methodName", seg[1]));
+                            beanDefinition1.getPropertyValues().addPropertyValue(
+                                    new PropertyValue("advice",
+                                            checkAspect(beanDefinition.getBeanClass(),  true, seg[1])));
+                            registry.registerBeanDefinition(beanName, beanDefinition1);
+                        }
                         aspect = true;
                         //切点是某个包或者类
                     }else {

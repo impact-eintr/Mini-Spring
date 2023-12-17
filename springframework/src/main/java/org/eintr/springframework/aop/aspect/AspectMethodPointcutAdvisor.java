@@ -11,13 +11,7 @@ public class AspectMethodPointcutAdvisor extends AspectPointcutAdvisor implement
 
     public Pointcut getPointcut() {
         if (null == pointcut) {
-            Class<?> clazz = null;
-            try {
-                clazz = ClassUtils.getDefaultClassLoader().loadClass(aopClass);
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
-            pointcut = new AspectMethodPointcut(clazz, methodName);
+            pointcut = new AspectMethodPointcut(aopClass, methodName);
         }
         return pointcut;
     }
