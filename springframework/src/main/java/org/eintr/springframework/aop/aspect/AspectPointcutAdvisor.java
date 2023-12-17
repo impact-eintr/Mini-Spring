@@ -7,6 +7,7 @@ import org.eintr.springframework.aop.MethodAdvice;
 import org.eintr.springframework.aop.MethodNode;
 import org.eintr.springframework.aop.Pointcut;
 import org.eintr.springframework.aop.PointcutAdvisor;
+import org.eintr.springframework.aop.aspect.support.DefaultAspectMethodAdvice;
 import org.eintr.springframework.aop.framework.adapter.MethodAdviceInterceptor;
 
 import java.lang.reflect.Method;
@@ -27,7 +28,8 @@ public abstract class AspectPointcutAdvisor implements PointcutAdvisor {
     private static HashMap<String, ArrayList<MethodNode>> afterDelegatedSet = new HashMap<>();
 
     // 具体的拦截方法
-    protected Advice advice = new MethodAdviceInterceptor();
+    //protected Advice advice = new MethodAdviceInterceptor();
+    protected Advice advice;
 
     @Override
     public Advice getAdvice() {
@@ -36,34 +38,5 @@ public abstract class AspectPointcutAdvisor implements PointcutAdvisor {
 
     public void setAdvice(Advice advice) {
         this.advice = advice;
-    }
-
-    /**
-     * 添加切入面类
-     * @param clazz 切面类Class
-     * @param key 被切面的类
-     * @param isMethod 是否是对方法切面
-     * @param MethodName 被切面的方法名字
-     */
-    protected void addToAspects(Class<?> clazz,String key,boolean isMethod,String MethodName) {
-
-        MethodAdvice advice1;
-        for (Method method : clazz.getMethods()) {
-            MethodNode methodNode=new MethodNode(method,isMethod);
-            methodNode.setMethodName(MethodName);
-
-            if(method.isAnnotationPresent(Before.class)) {
-                if(!beforeDelegatedSet.containsKey(key)) {
-                    beforeDelegatedSet.put(key, new ArrayList<>());
-                }
-                beforeDelegatedSet.get(key).add(methodNode);
-            }
-            if(method.isAnnotationPresent(After.class)) {
-                if(!afterDelegatedSet.containsKey(key)) {
-                    afterDelegatedSet.put(key, new ArrayList<>());
-                }
-                afterDelegatedSet.get(key).add(methodNode);
-            }
-        }
     }
 }

@@ -13,7 +13,10 @@ import java.util.Date;
 @Aspect
 public class TestAspect {
     @PointCut("org.eintr.springframework.test.bean.UserService.queryUserInfo()")
-    public void pointcut() {}
+    public void pointcut1() {}
+
+    @PointCut("org.eintr.springframework.test.bean.UserService.register()")
+    public void pointcut2() {}
 
     @Before
     public void before() {

@@ -19,11 +19,11 @@ import java.util.Set;
 public class AspectMethodPointcut extends AspectPointcut implements Pointcut, ClassFilter, MethodMatcher {
     private HashSet<Class<?>> classSet = new HashSet<>();
     private HashSet<String> methodSet = new HashSet<>();
-    public AspectMethodPointcut(Class<?> clazz,String key,String MethodName) {
-        classSet.add(clazz);
+    public AspectMethodPointcut(Class<?> clazz, String MethodName) {
+        classSet.add(clazz); //拦截这个类
         for (Method method : clazz.getMethods()) {
             if (MethodName.equals(method.getName())) {
-                methodSet.add(MethodName);
+                methodSet.add(MethodName); // 拦截这些方法
             }
         }
     }

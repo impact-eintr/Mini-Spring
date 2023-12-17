@@ -17,10 +17,7 @@ public class AspectMethodPointcutAdvisor extends AspectPointcutAdvisor implement
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
-            pointcut = new AspectMethodPointcut(clazz, aopClass, methodName);
-
-            // FIXME 添加 advice
-            //addToAspects(clazz, key, true, MethodName);
+            pointcut = new AspectMethodPointcut(clazz, methodName);
         }
         return pointcut;
     }

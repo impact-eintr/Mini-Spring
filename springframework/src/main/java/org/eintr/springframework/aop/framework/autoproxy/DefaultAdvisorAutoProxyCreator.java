@@ -32,18 +32,6 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
     // TODO spring默认实现AOP的逻辑
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        //if(method.isAnnotationPresent(Before.class)) {
-        //    if(!beforeDelegatedSet.containsKey(key)) {
-        //        beforeDelegatedSet.put(key, new ArrayList<>());
-        //    }
-        //    beforeDelegatedSet.get(key).add(methodNode);
-        //}
-        //if(method.isAnnotationPresent(After.class)) {
-        //    if(!afterDelegatedSet.containsKey(key)) {
-        //        afterDelegatedSet.put(key, new ArrayList<>());
-        //    }
-        //    afterDelegatedSet.get(key).add(methodNode);
-        //}
         return wrapIfNecessary(bean, beanName);
     }
 
