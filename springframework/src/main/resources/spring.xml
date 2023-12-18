@@ -12,7 +12,6 @@
     <context:component-scan base-package="org.eintr.springframework.test.bean"/>
 
 
-    <!--
      <bean id="interceptor" class="org.eintr.springframework.test.bean.UserServiceInterceptor"/>
     <bean id="pointcutAdvisor" class="org.eintr.springframework.aop.aspect.AspectJExpressionPointcutAdvisor">
         <property name="expression" value="execution(* org.eintr.springframework.test.bean.IUserService.*(..))"/>
@@ -20,6 +19,7 @@
     </bean>
 
 
+    <!--
     <bean id="converters" class="org.eintr.springframework.test.converter.ConvertersFactoryBean"/>
     <context:component-scan base-package="org.eintr.springframework.test.event"/>
     <context:component-scan base-package="org.eintr.springframework.test.common"/>

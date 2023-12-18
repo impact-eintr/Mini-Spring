@@ -6,8 +6,6 @@ import javax.servlet.http.HttpServlet;
 
 public class DispatcherServlet extends FrameworkServlet {
 
-
-
     protected void initStrategies(ApplicationContext context) {
         // 初始化 MultipartResolver
         initMultipartResolver(context);

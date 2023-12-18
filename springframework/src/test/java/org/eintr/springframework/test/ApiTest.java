@@ -37,6 +37,8 @@ public class ApiTest {
 		IUserService userService = applicationContext.getBean("userService", IUserService.class);
 		String result = userService.queryUserInfo("AAA");
 		System.out.println("测试结果：" + result);
+		result = userService.register("AAA");
+		System.out.println("测试结果：" + result);
 	}
 
 	@Test

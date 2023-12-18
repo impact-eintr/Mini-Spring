@@ -1,7 +1,6 @@
 package org.eintr.springframework.aop.framework;
 
 import org.aopalliance.intercept.MethodInterceptor;
-import org.eintr.springframework.AopProxy;
 import org.eintr.springframework.aop.AdvisedSupport;
 
 import java.lang.reflect.InvocationHandler;

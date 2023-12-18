@@ -22,4 +22,8 @@ public class PropertyValues {
 		}
 		return null;
 	}
+
+	public boolean isEmpty() {
+		return propertyValueList.isEmpty();
+	}
 }

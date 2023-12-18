@@ -1,6 +1,5 @@
 package org.eintr.springframework.aop.framework;
 
-import org.eintr.springframework.AopProxy;
 import org.eintr.springframework.aop.AdvisedSupport;
 
 public class ProxyFactory {

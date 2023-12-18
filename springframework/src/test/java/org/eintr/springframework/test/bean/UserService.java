@@ -14,7 +14,7 @@ public class UserService implements IUserService {
 
 	public String queryUserInfo(String name) {
 		try {
-			Thread.sleep(10);
+			Thread.sleep(1000);
 		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}
