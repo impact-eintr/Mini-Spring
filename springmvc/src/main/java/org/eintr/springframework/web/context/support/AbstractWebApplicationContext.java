@@ -1,8 +1,10 @@
-package org.eintr.springframework.context.support;
+package org.eintr.springframework.web.context.support;
 
 import org.eintr.springframework.beans.BeansException;
 import org.eintr.springframework.beans.factory.ConfigurableListableBeanFactory;
-import org.eintr.springframework.beans.factory.config.*;
+import org.eintr.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.eintr.springframework.beans.factory.config.BeanPostProcessor;
+import org.eintr.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.eintr.springframework.context.ApplicationContext;
 import org.eintr.springframework.context.ApplicationEvent;
 import org.eintr.springframework.context.ApplicationListener;
@@ -11,21 +13,27 @@ import org.eintr.springframework.context.event.ApplicationEventMulticaster;
 import org.eintr.springframework.context.event.ContextClosedEvent;
 import org.eintr.springframework.context.event.ContextRefreshedEvent;
 import org.eintr.springframework.context.event.SimpleApplicationEventMulticaster;
+import org.eintr.springframework.context.support.ApplicationContextAwareProcessor;
 import org.eintr.springframework.core.convert.ConversionService;
 import org.eintr.springframework.core.io.DefaultResourceLoader;
-import org.w3c.dom.Element;
+import org.eintr.springframework.web.context.ConfigurableWebApplicationContext;
 
+import javax.servlet.ServletContext;
 import java.util.Collection;
 import java.util.Map;
 
 // 抽象应用上下文
-public abstract class AbstractApplicationContext extends DefaultResourceLoader implements ConfigurableApplicationContext {
+public abstract class AbstractWebApplicationContext extends ServletContextResourceLoader implements ConfigurableWebApplicationContext {
 
     public static final String APPLICATION_EVENT_MULTICASTER_BEAN_NAME = "applicationEventMulticaster";
 
     private ApplicationEventMulticaster applicationEventMulticaster;
 
     private ApplicationContext parent;
+
+    public AbstractWebApplicationContext(ServletContext servletContext) {
+        super(servletContext);
+    }
 
     protected abstract void refreshBeanFactory() throws BeansException;
 
@@ -169,7 +177,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
 
     @Override
     public void close() {
-        System.out.println("----------------------- SPRING 准备销毁 ----------------------");
+        System.out.println("----------------------- SPRING MVC 准备销毁 ----------------------");
         publishEvent(new ContextClosedEvent(this)); // 通知关闭事件
         getBeanFactory().destroySingletons();
     }

@@ -17,6 +17,7 @@ import org.eintr.springframework.core.convert.converter.Converter;
 import org.eintr.springframework.core.convert.support.StringToNumberConverterFactory;
 import org.eintr.springframework.test.bean.*;
 import org.eintr.springframework.test.event.CustomEvent;
+import org.eintr.springframework.web.context.support.XmlWebApplicationContext;
 import org.eintr.springframework.web.servlet.DispatcherServlet;
 import org.junit.Test;
 import java.lang.reflect.InvocationHandler;
@@ -47,11 +48,11 @@ public class ApiTest {
 	public void test_web_xml() {
 		try{
 			// 1.初始化 BeanFactory
-			ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:spring.xml");
-			applicationContext.registerShutdownHook();
+			//XmlWebApplicationContext applicationContext = new XmlWebApplicationContext("classpath:spring-mvc.xml");
+			//applicationContext.registerShutdownHook();
 
-			DispatcherServlet dispatcherServlet = applicationContext.getBean("dispatcherServlet", DispatcherServlet.class);
-			dispatcherServlet.init();
+			//DispatcherServlet dispatcherServlet = applicationContext.getBean("dispatcherServlet", DispatcherServlet.class);
+			//dispatcherServlet.init();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

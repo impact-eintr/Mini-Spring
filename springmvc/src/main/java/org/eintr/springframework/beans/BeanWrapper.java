@@ -1,5 +1,9 @@
 package org.eintr.springframework.beans;
 
+import org.eintr.springframework.core.io.ResourceLoader;
+
+import java.beans.PropertyEditor;
+
 public interface BeanWrapper {
     /**
      * Return the bean instance wrapped by this object.
@@ -13,8 +17,11 @@ public interface BeanWrapper {
      */
     Class<?> getWrappedClass();
 
+    void registerCustomEditor(Class<?> requiredType, ResourceLoader loader);
 
     void setPropertyValues(PropertyValues pvs, boolean ignoreUnknown)
             throws BeansException;
+
+    PropertyValues getPropertyValues() throws BeansException;
 
 }

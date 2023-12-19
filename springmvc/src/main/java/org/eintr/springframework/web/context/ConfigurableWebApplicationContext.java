@@ -1,9 +1,10 @@
-package org.eintr.springframework.context;
+package org.eintr.springframework.web.context;
 
 import org.eintr.springframework.beans.BeansException;
+import org.eintr.springframework.context.ApplicationContext;
 
 
-public interface ConfigurableApplicationContext extends ApplicationContext {
+public interface ConfigurableWebApplicationContext extends WebApplicationContext {
     // 刷新容器
     void refresh() throws BeansException;
 

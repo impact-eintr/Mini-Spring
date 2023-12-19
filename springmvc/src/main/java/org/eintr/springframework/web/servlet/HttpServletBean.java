@@ -2,11 +2,8 @@ package org.eintr.springframework.web.servlet;
 
 import org.eintr.springframework.beans.*;
 import org.eintr.springframework.core.env.EnvironmentCapable;
-import org.eintr.springframework.core.io.Resource;
-import org.eintr.springframework.core.io.ResourceLoader;
 import org.eintr.springframework.util.CollectionUtils;
 import org.eintr.springframework.util.StringUtils;
-import org.eintr.springframework.web.context.support.ServletContextResourceLoader;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -16,7 +13,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class HttpServletBean extends HttpServlet implements EnvironmentCapable {
-    private final Set<String> requiredProperties = new HashSet<>(4);
+    private final Set<String> requiredProperties = new HashSet<>(4); // 映射web.xml
 
     protected final void addRequiredProperty(String property) {
         this.requiredProperties.add(property);
@@ -32,34 +29,24 @@ public class HttpServletBean extends HttpServlet implements EnvironmentCapable {
                 // 将 HttpServletBean 创建
                 BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(this);
                 // 资源加载器创建,核心对象是 ServletContext
-                ResourceLoader resourceLoader = new ServletContextResourceLoader(getServletContext());
+                //ResourceLoader resourceLoader = new ServletContextResourceLoader(getServletContext());
                 // 注册自定义编辑器
-                //bw.registerCustomEditor(Resource.class, new ResourceEditor(resourceLoader, getEnvironment()));
-                // 实例化 BeanWrapper
-                initBeanWrapper(bw);
+                //bw.registerCustomEditor(Resource.class, resourceLoader);
                 // BeanWrapper 设置属性
                 bw.setPropertyValues(pvs, true);
-
-                // TODO 这里是存储这个 spring-mvc.xml 的内容 不需要启动cocntext机制
-                // 后续将会在webApplicatioContext中启动 这个context依赖于 spring-mvc.xml
-                // BeanWrapper 不需要实现任何东西 只要吧这个xml保存下来就行
             }
             catch (BeansException ex) {
                 ex.printStackTrace();
                 throw ex;
             }
+        } else {
+            pvs = new ServletConfigPropertyValues(getServletConfig(), this.requiredProperties);
         }
-
-        // Let subclasses do whatever initialization they like.
-        // 实例化 ServletBean
-        initServletBean();
+        initServletBean(pvs);
     }
 
 
-    protected void initBeanWrapper(BeanWrapper bw) throws BeansException {
-    }
-
-    protected void initServletBean() throws ServletException {
+    protected void initServletBean(PropertyValues pvs) throws ServletException {
     }
 
 

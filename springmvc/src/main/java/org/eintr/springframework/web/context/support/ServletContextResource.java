@@ -5,6 +5,7 @@ import org.eintr.springframework.core.io.Resource;
 import org.eintr.springframework.util.StringUtils;
 
 import javax.servlet.ServletContext;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -39,6 +40,10 @@ public class ServletContextResource implements Resource {
     }
     @Override
     public InputStream getInputStream() throws IOException {
-        return null;
+        InputStream is = servletContext.getClassLoader().getResourceAsStream(path);
+        if (is == null) {
+            throw new FileNotFoundException(this.path + "can not find");
+        }
+        return is;
     }
 }
