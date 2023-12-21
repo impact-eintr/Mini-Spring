@@ -6,6 +6,7 @@ import org.eintr.springframework.beans.PropertyAccessorFactory;
 import org.eintr.springframework.beans.PropertyValues;
 import org.eintr.springframework.context.ApplicationContext;
 import org.eintr.springframework.context.ApplicationContextAware;
+import org.eintr.springframework.util.BeanUtils;
 import org.eintr.springframework.web.context.ConfigurableWebApplicationContext;
 import org.eintr.springframework.web.context.WebApplicationContext;
 import org.eintr.springframework.web.context.WebApplicationContextUtils;
@@ -105,8 +106,7 @@ public class FrameworkServlet extends HttpServletBean implements ApplicationCont
         String location = (String) this.propertyValues.getPropertyValues()[0].getValue();
 
         ConfigurableWebApplicationContext wac =
-                (ConfigurableWebApplicationContext)
-                new XmlWebApplicationContext(getServletContext(), location);
+                (ConfigurableWebApplicationContext) BeanUtils.instantiateClass(contextClass);
         if (parent != null) {
             wac.setParent(parent);
         }
@@ -114,7 +114,7 @@ public class FrameworkServlet extends HttpServletBean implements ApplicationCont
         configureAndRefreshWebApplicationContext(wac);
         return wac;
     }
-    protected void configureAndRefreshWebApplicationContext(ConfigurableWebApplicationContext wac {
+    protected void configureAndRefreshWebApplicationContext(ConfigurableWebApplicationContext wac) {
 
     }
 

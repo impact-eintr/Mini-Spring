@@ -3,15 +3,17 @@ package org.eintr.springframework.web.context.support;
 import org.eintr.springframework.beans.BeansException;
 import org.eintr.springframework.beans.factory.ConfigurableListableBeanFactory;
 import org.eintr.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.eintr.springframework.context.support.AbstractRefreshableApplicationContext;
+import org.eintr.springframework.web.context.ConfigurableWebApplicationContext;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 
-public  abstract class AbstractRefreshableWebApplicationContext extends AbstractWebApplicationContext {
+public  abstract class AbstractRefreshableWebApplicationContext extends AbstractRefreshableApplicationContext
+implements ConfigurableWebApplicationContext {
     private DefaultListableBeanFactory beanFactory;
-
-    public AbstractRefreshableWebApplicationContext(ServletContext servletContext) {
-        super(servletContext);
-    }
+    private ServletConfig servletConfig;
+    private ServletContext servletContext;
 
     @Override
     protected void refreshBeanFactory() throws BeansException {

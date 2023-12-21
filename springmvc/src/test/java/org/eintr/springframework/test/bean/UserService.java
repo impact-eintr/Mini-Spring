@@ -1,5 +1,7 @@
 package org.eintr.springframework.test.bean;
 
+import org.eintr.springframework.annotation.beans.Autowired;
+import org.eintr.springframework.annotation.beans.Qualifier;
 import org.eintr.springframework.annotation.beans.Value;
 import org.eintr.springframework.annotation.stereotype.Component;
 
@@ -9,6 +11,8 @@ public class UserService implements IUserService {
 	@Value("天津")
 	private String location;
 	private String Language;
+	@Autowired
+	@Qualifier("userDao")
 	private IUserDao userDao;
 
 

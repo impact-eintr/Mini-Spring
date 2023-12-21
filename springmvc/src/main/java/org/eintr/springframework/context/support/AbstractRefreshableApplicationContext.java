@@ -3,9 +3,17 @@ package org.eintr.springframework.context.support;
 import org.eintr.springframework.beans.BeansException;
 import org.eintr.springframework.beans.factory.ConfigurableListableBeanFactory;
 import org.eintr.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.eintr.springframework.context.ConfigurableApplicationContext;
+import org.eintr.springframework.web.context.ConfigurableWebApplicationContext;
 
-public  abstract class AbstractRefreshableApplicationContext extends AbstractApplicationContext {
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+
+public  abstract class AbstractRefreshableApplicationContext extends AbstractApplicationContext
+        implements ConfigurableApplicationContext {
     private DefaultListableBeanFactory beanFactory;
+    private ServletConfig servletConfig;
+    private ServletContext servletContext;
 
     @Override
     protected void refreshBeanFactory() throws BeansException {
@@ -13,6 +21,7 @@ public  abstract class AbstractRefreshableApplicationContext extends AbstractApp
         loadBeanDefinitions(beanFactory);
         this.beanFactory = beanFactory;
     }
+
 
     private DefaultListableBeanFactory createBeanFactory() {
         return new DefaultListableBeanFactory();

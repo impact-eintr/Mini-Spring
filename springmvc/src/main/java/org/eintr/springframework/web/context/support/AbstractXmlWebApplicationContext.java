@@ -2,23 +2,12 @@ package org.eintr.springframework.web.context.support;
 
 import org.eintr.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.eintr.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.eintr.springframework.context.support.AbstractRefreshableApplicationContext;
 
 import javax.servlet.ServletContext;
 
-public abstract class AbstractXmlWebApplicationContext extends AbstractRefreshableWebApplicationContext {
-    public AbstractXmlWebApplicationContext(ServletContext servletContext) {
-        super(servletContext);
-    }
+public abstract class AbstractXmlWebApplicationContext extends AbstractRefreshaleApplicationContext {
 
-    @Override
-    protected void loadBeanDefinitions(DefaultListableBeanFactory beanFactory) {
-        XmlBeanDefinitionReader beanDefinitionReader =
-                new XmlBeanDefinitionReader(beanFactory, this);
-        String[] configLocations = getConfigLocations();
-        if (null != configLocations) {
-            beanDefinitionReader.loadBeanDefinitions(configLocations);
-        }
-    }
 
     protected abstract String[] getConfigLocations();
 }

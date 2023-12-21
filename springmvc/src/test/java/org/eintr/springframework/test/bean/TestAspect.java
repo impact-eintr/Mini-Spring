@@ -10,6 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Component("TestAspect")
+@Aspect
 public class TestAspect {
     @PointCut("org.eintr.springframework.test.bean.UserService.queryUserInfo()")
     public void pointcut1() {}
