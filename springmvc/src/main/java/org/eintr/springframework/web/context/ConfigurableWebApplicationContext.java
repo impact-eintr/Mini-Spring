@@ -2,12 +2,14 @@ package org.eintr.springframework.web.context;
 
 import org.eintr.springframework.beans.BeansException;
 import org.eintr.springframework.context.ApplicationContext;
+import org.eintr.springframework.context.ConfigurableApplicationContext;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 
 
-public interface ConfigurableWebApplicationContext extends WebApplicationContext {
+public interface ConfigurableWebApplicationContext
+        extends WebApplicationContext, ConfigurableApplicationContext {
     /**
      * Prefix for ApplicationContext ids that refer to context path and/or servlet name.
      * 应用上下文 id 前缀

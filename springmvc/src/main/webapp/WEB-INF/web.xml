@@ -9,7 +9,8 @@
     <servlet-class>org.eintr.springframework.web.servlet.DispatcherServlet</servlet-class>
     <init-param>
       <param-name>ContextConfigLocation</param-name>
-      <param-value>classpath:spring-mvc.xml</param-value>
+      <!--param-value>classpath:spring-mvc.xml</param-value-->
+      <param-value>/WEB-INF/applicationContext.xml</param-value>
     </init-param>
   </servlet>
 

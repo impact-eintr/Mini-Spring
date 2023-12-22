@@ -1,5 +1,6 @@
 package org.eintr.springframework.context.support;
 
+import cn.hutool.core.lang.Assert;
 import org.eintr.springframework.beans.BeansException;
 import org.eintr.springframework.beans.factory.ConfigurableListableBeanFactory;
 import org.eintr.springframework.beans.factory.config.*;
@@ -16,14 +17,20 @@ import org.eintr.springframework.core.io.DefaultResourceLoader;
 import org.w3c.dom.Element;
 
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 // 抽象应用上下文
 public abstract class AbstractApplicationContext extends DefaultResourceLoader implements ConfigurableApplicationContext {
 
     public static final String APPLICATION_EVENT_MULTICASTER_BEAN_NAME = "applicationEventMulticaster";
 
+    // 广播器
     private ApplicationEventMulticaster applicationEventMulticaster;
+
+    // 监听器列表
+    private final Set<ApplicationListener<?>> applicationListeners = new LinkedHashSet<>();
 
     private ApplicationContext parent;
 
@@ -63,6 +70,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
     }
 
     private void registerListeners() {
+        // 这里是内部注册的监听器
+        for (ApplicationListener listener : this.applicationListeners) {
+            applicationEventMulticaster.addApplicationListener(listener);
+        }
+
+        // 这里是用户自定义的监听器
         Collection<ApplicationListener> applicationListeners =
                 getBeansOfType(ApplicationListener.class).values();
         for (ApplicationListener listener : applicationListeners) {
@@ -165,6 +178,15 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
     @Override
     public void registerShutdownHook() {
         Runtime.getRuntime().addShutdownHook(new Thread(this::close));
+    }
+
+    @Override
+    public void addApplicationListener(ApplicationListener<?> listener) {
+        Assert.notNull(listener, "ApplicationListener must not be null");
+        if (this.applicationEventMulticaster != null) {
+            this.applicationEventMulticaster.addApplicationListener(listener);
+        }
+        this.applicationListeners.add(listener);
     }
 
     @Override

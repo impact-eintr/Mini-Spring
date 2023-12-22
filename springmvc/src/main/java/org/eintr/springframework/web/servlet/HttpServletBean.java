@@ -21,32 +21,31 @@ public class HttpServletBean extends HttpServlet implements EnvironmentCapable {
 
     @Override
     public final void init() throws ServletException {
-        // Set bean properties from init parameters.
         // 获取 web.xml 中的配置
-        PropertyValues pvs = new ServletConfigPropertyValues(getServletConfig(), this.requiredProperties);
-        if (!pvs.isEmpty()) {
-            try {
-                // 将 HttpServletBean 创建
-                BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(this);
-                // 资源加载器创建,核心对象是 ServletContext
-                //ResourceLoader resourceLoader = new ServletContextResourceLoader(getServletContext());
-                // 注册自定义编辑器
-                //bw.registerCustomEditor(Resource.class, resourceLoader);
-                // BeanWrapper 设置属性
-                bw.setPropertyValues(pvs, true);
-            }
-            catch (BeansException ex) {
-                ex.printStackTrace();
-                throw ex;
-            }
-        } else {
-            pvs = new ServletConfigPropertyValues(getServletConfig(), this.requiredProperties);
-        }
-        initServletBean(pvs);
+        //PropertyValues pvs = new ServletConfigPropertyValues(getServletConfig(), this.requiredProperties);
+        //if (!pvs.isEmpty()) {
+        //    try {
+        //        // 将 HttpServletBean 创建
+        //        BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(this);
+        //        // 资源加载器创建,核心对象是 ServletContext
+        //        //ResourceLoader resourceLoader = new ServletContextResourceLoader(getServletContext());
+        //        // 注册自定义编辑器
+        //        //bw.registerCustomEditor(Resource.class, resourceLoader);
+        //        // BeanWrapper 设置属性
+        //        bw.setPropertyValues(pvs, true);
+        //    }
+        //    catch (BeansException ex) {
+        //        ex.printStackTrace();
+        //        throw ex;
+        //    }
+        //} else {
+        //    pvs = new ServletConfigPropertyValues(getServletConfig(), this.requiredProperties);
+        //}
+        initServletBean();
     }
 
 
-    protected void initServletBean(PropertyValues pvs) throws ServletException {
+    protected void initServletBean() throws ServletException {
     }
 
 

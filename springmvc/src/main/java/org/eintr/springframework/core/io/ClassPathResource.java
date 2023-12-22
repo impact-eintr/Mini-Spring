@@ -10,6 +10,8 @@ public class ClassPathResource implements Resource {
 
     private ClassLoader classLoader;
 
+    private Class<?> clazz;
+
     public ClassPathResource(String path) {
         this(path, (ClassLoader)null);
     }
@@ -19,11 +21,28 @@ public class ClassPathResource implements Resource {
         this.classLoader = (classLoader != null ? classLoader : ClassUtils.getDefaultClassLoader());
     }
 
+    public ClassPathResource(String path, Class<?> clazz) {
+        this.path = path;
+        this.clazz = clazz;
+    }
+
     public InputStream getInputStream() throws IOException {
-        InputStream is = classLoader.getResourceAsStream(path);
+        InputStream is;
+        if (this.classLoader != null) {
+            is = this.classLoader.getResourceAsStream(this.path);
+        } else if (this.clazz != null) {
+            is = this.clazz.getResourceAsStream(this.path);
+        } else {
+            is = ClassLoader.getSystemResourceAsStream(this.path);
+        }
         if (is == null) {
             throw new FileNotFoundException(this.path + "can not find");
         }
         return is;
+    }
+
+    @Override
+    public String getFilename() {
+        return path;
     }
 }

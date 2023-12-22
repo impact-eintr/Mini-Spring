@@ -38,6 +38,7 @@ public class ServletContextResource implements Resource {
         }
         this.path = pathToUse;
     }
+
     @Override
     public InputStream getInputStream() throws IOException {
         InputStream is = servletContext.getClassLoader().getResourceAsStream(path);
@@ -45,5 +46,10 @@ public class ServletContextResource implements Resource {
             throw new FileNotFoundException(this.path + "can not find");
         }
         return is;
+    }
+
+    @Override
+    public String getFilename() {
+        return path;
     }
 }

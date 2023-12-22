@@ -17,10 +17,11 @@ public class ServletContextResourceLoader extends DefaultResourceLoader {
     public Resource getResource(String location) {
         Assert.notNull(location, "Location must not be null");
         if (location.startsWith(CLASSPATH_URL_PREFIX)) {
-            return new ServletContextResource(servletContext, location.substring(CLASSPATH_URL_PREFIX.length()));
+            return new ServletContextResource(servletContext,
+                    location.substring(CLASSPATH_URL_PREFIX.length()));
         } else {
             try {
-                URL url = new URL(location);
+                URL url = this.servletContext.getResource(location);
                 return new UrlResource(url);
             } catch (MalformedURLException e) {
                 return new FileSystemResource(location);

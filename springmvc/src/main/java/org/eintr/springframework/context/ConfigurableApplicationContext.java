@@ -11,5 +11,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext {
 
     void setParent(ApplicationContext parent);
 
+    void addApplicationListener(ApplicationListener<?> listener);
+
     void close();
 }

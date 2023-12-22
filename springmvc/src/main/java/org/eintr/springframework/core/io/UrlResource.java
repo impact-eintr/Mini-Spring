@@ -27,4 +27,9 @@ public class UrlResource implements Resource {
             throw ex;
         }
     }
+
+    @Override
+    public String getFilename() {
+        return null;
+    }
 }

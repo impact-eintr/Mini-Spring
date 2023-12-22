@@ -12,8 +12,6 @@ import javax.servlet.ServletContext;
 public  abstract class AbstractRefreshableApplicationContext extends AbstractApplicationContext
         implements ConfigurableApplicationContext {
     private DefaultListableBeanFactory beanFactory;
-    private ServletConfig servletConfig;
-    private ServletContext servletContext;
 
     @Override
     protected void refreshBeanFactory() throws BeansException {

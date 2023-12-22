@@ -3,6 +3,7 @@ package org.eintr.springframework.beans.factory.support;
 import cn.hutool.core.bean.BeanException;
 import org.eintr.springframework.beans.BeansException;
 import org.eintr.springframework.beans.factory.ConfigurableListableBeanFactory;
+import org.eintr.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.eintr.springframework.beans.factory.config.BeanDefinition;
 import org.eintr.springframework.beans.factory.config.BeanPostProcessor;
 
@@ -35,7 +36,7 @@ public class DefaultListableBeanFactory extends AbstructAutowireCapableBeanFacto
 	public BeanDefinition getBeanDefinition(String beanName) throws BeanException {
 		BeanDefinition beanDefinition = beanDefinitionMap.get(beanName);
 		if (beanDefinition == null) {
-			throw new BeansException("No bean named '"+beanName+"' is defined");
+			throw new NoSuchBeanDefinitionException("No bean named '"+beanName+"' is defined");
 		}
 		return beanDefinition;
 	}

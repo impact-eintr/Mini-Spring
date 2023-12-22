@@ -23,6 +23,11 @@ public class FileSystemResource implements Resource {
         return new FileInputStream(this.file);
     }
 
+    @Override
+    public String getFilename() {
+        return null;
+    }
+
     public final String getPath() {
         return this.path;
     }
