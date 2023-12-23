@@ -195,4 +195,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
         publishEvent(new ContextClosedEvent(this)); // 通知关闭事件
         getBeanFactory().destroySingletons();
     }
+
+
+    @Override
+    public AutowireCapableBeanFactory getAutowireCapableBeanFactory() throws IllegalStateException {
+        return getBeanFactory();
+    }
 }

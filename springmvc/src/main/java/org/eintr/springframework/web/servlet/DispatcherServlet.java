@@ -4,6 +4,7 @@ import org.eintr.springframework.beans.factory.BeanInitializationException;
 import org.eintr.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.eintr.springframework.context.ApplicationContext;
 import org.eintr.springframework.core.io.ClassPathResource;
+import org.eintr.springframework.util.ClassUtils;
 import org.eintr.springframework.util.PropertiesLoaderUtils;
 import org.eintr.springframework.util.StringUtils;
 
@@ -238,26 +239,30 @@ public class DispatcherServlet extends FrameworkServlet {
             String[] classNames = StringUtils.commaDelimitedListToStringArray(value);
             List<T> strategies = new ArrayList<>(classNames.length);
             for (String className : classNames) {
-                //try {
-                //    // 反射获取类
-                //    Class<?> clazz = ClassUtils.forName(className, DispatcherServlet.class.getClassLoader());
-                //    // 创建对象
-                //    Object strategy = createDefaultStrategy(context, clazz);
-                //    strategies.add((T) strategy);
-                //} catch (ClassNotFoundException ex) {
-                //    throw new BeanInitializationException(
-                //            "Could not find DispatcherServlet's default strategy class [" + className +
-                //                    "] for interface [" + key + "]", ex);
-                //} catch (LinkageError err) {
-                //    throw new BeanInitializationException(
-                //            "Unresolvable class definition for DispatcherServlet's default strategy class [" +
-                //                    className + "] for interface [" + key + "]", err);
-                //}
+                try {
+                    // 反射获取类
+                    Class<?> clazz = ClassUtils.forName(className, DispatcherServlet.class.getClassLoader());
+                    // 创建对象
+                    Object strategy = createDefaultStrategy(context, clazz);
+                    strategies.add((T) strategy);
+                } catch (ClassNotFoundException ex) {
+                    throw new BeanInitializationException(
+                            "Could not find DispatcherServlet's default strategy class [" + className +
+                                    "] for interface [" + key + "]", ex);
+                } catch (LinkageError err) {
+                    throw new BeanInitializationException(
+                            "Unresolvable class definition for DispatcherServlet's default strategy class [" +
+                                    className + "] for interface [" + key + "]", err);
+                }
             }
             return strategies;
         } else {
             return new LinkedList<>();
         }
+    }
+
+    protected Object createDefaultStrategy(ApplicationContext context, Class<?> clazz) {
+        return context.getAutowireCapableBeanFactory().createBean(clazz);
     }
 }
 

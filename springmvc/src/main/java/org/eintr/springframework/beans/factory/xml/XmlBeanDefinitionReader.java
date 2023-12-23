@@ -15,6 +15,7 @@ import org.eintr.springframework.beans.factory.config.BeanDefinition;
 import org.eintr.springframework.beans.factory.config.BeanReference;
 import org.eintr.springframework.beans.factory.support.AbstractBeanDefinitionReader;
 import org.eintr.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.eintr.springframework.web.servlet.resource.DefaultServletHttpRequestHandler;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -78,6 +79,15 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		getRegistry().registerBeanDefinition(
 				StrUtil.lowerFirst(DefaultAdvisorAutoProxyCreator.class.getSimpleName()),
 				new BeanDefinition(DefaultAdvisorAutoProxyCreator.class));
+
+
+		List<Element> default_servlet_name = root.elements("default-servlet-name");
+		if (!default_servlet_name.isEmpty()) {
+			BeanDefinition defaultServletHandlerDef = new BeanDefinition(DefaultServletHttpRequestHandler.class);
+			String defaultServletHandlerName  = defaultServletHandlerDef.getBeanClass().getName();
+			getRegistry().registerBeanDefinition(defaultServletHandlerName, defaultServletHandlerDef);
+		}
+
 
 		List<Element> beanList = root.elements("bean");
 		for (Element bean : beanList) {

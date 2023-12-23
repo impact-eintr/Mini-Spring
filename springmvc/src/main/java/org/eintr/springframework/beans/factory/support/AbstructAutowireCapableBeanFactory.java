@@ -27,6 +27,12 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 		return doCreateBean(beanName, beanDefinition, args);
 	}
 
+	public <T> T createBean(Class<T> beanClass) throws BeansException {
+		BeanDefinition beanDefinition = new BeanDefinition(beanClass);
+		beanDefinition.setScope(SCOPE_PROTOTYPE);
+		return (T) createBean(beanClass.getName(), beanDefinition, null);
+	}
+
 	protected Object doCreateBean(String beanName, BeanDefinition beanDefinition, Object[] args) throws BeansException {
 		Object bean = null;
 		try {
