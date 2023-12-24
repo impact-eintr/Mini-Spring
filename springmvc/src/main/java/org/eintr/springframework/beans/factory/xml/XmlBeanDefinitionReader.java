@@ -15,11 +15,15 @@ import org.eintr.springframework.beans.factory.config.BeanDefinition;
 import org.eintr.springframework.beans.factory.config.BeanReference;
 import org.eintr.springframework.beans.factory.support.AbstractBeanDefinitionReader;
 import org.eintr.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.eintr.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.eintr.springframework.web.servlet.resource.DefaultServletHttpRequestHandler;
+import sun.awt.image.ImageWatched;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
@@ -81,11 +85,23 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 				new BeanDefinition(DefaultAdvisorAutoProxyCreator.class));
 
 
-		List<Element> default_servlet_name = root.elements("default-servlet-name");
+		// web mvc 注册默认处理器
+		List<Element> default_servlet_name = root.elements("default-servlet-handler");
 		if (!default_servlet_name.isEmpty()) {
+			// 默认的servlet 处理器
 			BeanDefinition defaultServletHandlerDef = new BeanDefinition(DefaultServletHttpRequestHandler.class);
 			String defaultServletHandlerName  = defaultServletHandlerDef.getBeanClass().getName();
 			getRegistry().registerBeanDefinition(defaultServletHandlerName, defaultServletHandlerDef);
+
+			Map<String, String> urlMap = new LinkedHashMap<>();
+			urlMap.put("/**", defaultServletHandlerName);
+
+			// 默认的handler映射
+			BeanDefinition handlerMappingDef = new BeanDefinition(SimpleUrlHandlerMapping.class);
+			handlerMappingDef.getPropertyValues().add("urlMap", urlMap);
+			String defaultHandlerMappingName  = handlerMappingDef.getBeanClass().getName();
+			getRegistry().registerBeanDefinition(defaultHandlerMappingName,
+					handlerMappingDef);
 		}
 
 

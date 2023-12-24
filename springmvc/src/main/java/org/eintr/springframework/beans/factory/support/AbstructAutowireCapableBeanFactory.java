@@ -13,6 +13,7 @@ import org.eintr.springframework.core.convert.support.DefaultConversionService;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 
 public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFactory implements AutowireCapableBeanFactory {
 
@@ -192,6 +193,7 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 					value = getBean(beanReference.getBeanName());
 				} else { // 类型转换
 					Class<?> sourceType = value.getClass();
+					Type t = TypeUtil.getFieldType(bean.getClass(), name);
 					Class<?> targetType = (Class<?>) TypeUtil.getFieldType(bean.getClass(), name);
 					ConversionService conversionService = new DefaultConversionService();
 					if (conversionService != null) {

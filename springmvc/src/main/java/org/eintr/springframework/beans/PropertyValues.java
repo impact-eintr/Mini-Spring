@@ -10,6 +10,11 @@ public class PropertyValues {
 		this.propertyValueList.add(pv);
 	}
 
+
+	public void add(String name, Object value) {
+		this.propertyValueList.add(new PropertyValue(name, value));
+	}
+
 	public PropertyValue[] getPropertyValues() {
 		return this.propertyValueList.toArray(new PropertyValue[0]);
 	}
