@@ -6,15 +6,22 @@ import org.eintr.springframework.context.ApplicationContextAware;
 import org.eintr.springframework.context.ApplicationListener;
 import org.eintr.springframework.context.ConfigurableApplicationContext;
 import org.eintr.springframework.context.event.ContextRefreshedEvent;
+import org.eintr.springframework.http.HttpMethod;
 import org.eintr.springframework.util.BeanUtils;
+import org.eintr.springframework.util.WebUtils;
 import org.eintr.springframework.web.context.ConfigurableWebApplicationContext;
 import org.eintr.springframework.web.context.WebApplicationContext;
+import org.eintr.springframework.web.context.support.ServletRequestHandledEvent;
 import org.eintr.springframework.web.context.support.WebApplicationContextUtils;
 import org.eintr.springframework.web.context.support.XmlWebApplicationContext;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.security.Principal;
 
-public class FrameworkServlet extends HttpServletBean implements ApplicationContextAware {
+public abstract class FrameworkServlet extends HttpServletBean implements ApplicationContextAware {
 
     public static final Class<?> DEFAULT_CONTEXT_CLASS = XmlWebApplicationContext.class;
 
@@ -30,6 +37,8 @@ public class FrameworkServlet extends HttpServletBean implements ApplicationCont
     private final Object onRefreshMonitor = new Object();
 
     private volatile boolean refreshEventReceived = false;
+
+    private boolean publishEvents = true;
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
@@ -57,6 +66,10 @@ public class FrameworkServlet extends HttpServletBean implements ApplicationCont
             ex.printStackTrace();
             throw ex;
         }
+    }
+
+    public final WebApplicationContext getWebApplicationContext() {
+        return this.webApplicationContext;
     }
 
     protected WebApplicationContext initWebApplicationContext() {
@@ -167,33 +180,139 @@ public class FrameworkServlet extends HttpServletBean implements ApplicationCont
 
 
     protected void applyInitializers(ConfigurableApplicationContext wac) {
+        /* TODO 没必要的话就不做
         // 获取初始化参数
         // 提取 globalInitializerClasses 参数
-        //String globalClassNames = getServletContext().getInitParameter(ContextLoader.GLOBAL_INITIALIZER_CLASSES_PARAM);
-        //System.out.println(globalClassNames);
-        //if (globalClassNames != null) {
-        //    // 循环加载类 从类名转换到ApplicationContextInitializer对象
-        //    for (String className : StringUtils.tokenizeToStringArray(globalClassNames, INIT_PARAM_DELIMITERS)) {
-        //        this.contextInitializers.add(loadInitializer(className, wac));
-        //    }
-        //}
+        String globalClassNames = getServletContext().getInitParameter(ContextLoader.GLOBAL_INITIALIZER_CLASSES_PARAM);
+        System.out.println(globalClassNames);
+        if (globalClassNames != null) {
+            // 循环加载类 从类名转换到ApplicationContextInitializer对象
+            for (String className : StringUtils.tokenizeToStringArray(globalClassNames, INIT_PARAM_DELIMITERS)) {
+                this.contextInitializers.add(loadInitializer(className, wac));
+            }
+        }
 
         // 如果当前 contextInitializerClasses 字符串存在则进行实例化
-        //if (this.contextInitializerClasses != null) {
-        //    for (String className : StringUtils.tokenizeToStringArray(this.contextInitializerClasses, INIT_PARAM_DELIMITERS)) {
-        //        this.contextInitializers.add(loadInitializer(className, wac));
-        //    }
-        //}
+        if (this.contextInitializerClasses != null) {
+            for (String className : StringUtils.tokenizeToStringArray(this.contextInitializerClasses, INIT_PARAM_DELIMITERS)) {
+                this.contextInitializers.add(loadInitializer(className, wac));
+            }
+        }
 
         // 循环调用 ApplicationContextInitializer
-        //for (ApplicationContextInitializer<ConfigurableApplicationContext> initializer : this.contextInitializers) {
-        //    initializer.initialize(wac);
-        //}
+        for (ApplicationContextInitializer<ConfigurableApplicationContext> initializer : this.contextInitializers) {
+            initializer.initialize(wac);
+        }
+         */
     }
 
     protected void onRefresh(ApplicationContext context) {
 
     }
+
+
+    protected void service(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        HttpMethod httpMethod = HttpMethod.resolve(request.getMethod());
+        if (httpMethod == HttpMethod.PATCH || httpMethod == null) {
+            processRequest(request, response);
+        } else {
+            super.service(request, response);
+        }
+    }
+
+
+    /**
+     * Delegate GET requests to processRequest/doService.
+     * <p>Will also be invoked by HttpServlet's default implementation of {@code doHead},
+     * with a {@code NoBodyResponse} that just captures the content length.
+     * @see #doService
+     * @see #doHead
+     */
+    @Override
+    protected final void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        processRequest(request, response);
+    }
+
+    /**
+     * Delegate POST requests to {@link #processRequest}.
+     * @see #doService
+     */
+    @Override
+    protected final void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        processRequest(request, response);
+    }
+
+    /**
+     * Delegate PUT requests to {@link #processRequest}.
+     * @see #doService
+     */
+    @Override
+    protected final void doPut(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        processRequest(request, response);
+    }
+
+    /**
+     * Delegate DELETE requests to {@link #processRequest}.
+     * @see #doService
+     */
+    @Override
+    protected final void doDelete(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        processRequest(request, response);
+    }
+
+    protected abstract void doService(HttpServletRequest request, HttpServletResponse response) throws Exception;
+
+
+    protected final void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        long startTime = System.currentTimeMillis();
+        Throwable failureCause = null;
+
+        try {
+            doService(request, response);
+        } catch (ServletException|IOException ex) {
+            failureCause = ex;
+            throw ex;
+        } catch (Throwable ex) {
+            failureCause = ex;
+            throw new ServletException("Request processing failed", ex);
+        } finally {
+            System.out.println("处理时间: "+(System.currentTimeMillis() - startTime)+" ms");
+            publishRequestHandledEvent(request, response, startTime, failureCause);
+        }
+    }
+
+    private void publishRequestHandledEvent(HttpServletRequest request, HttpServletResponse response,
+                                            long startTime, Throwable failureCause) {
+
+        if (this.publishEvents && this.webApplicationContext != null) {
+            // Whether or not we succeeded, publish an event.
+            long processingTime = System.currentTimeMillis() - startTime;
+            this.webApplicationContext.publishEvent(
+                    new ServletRequestHandledEvent(this,
+                            request.getRequestURI(), request.getRemoteAddr(),
+                            request.getMethod(), getServletConfig().getServletName(),
+                            WebUtils.getSessionId(request), getUsernameForRequest(request),
+                            processingTime, failureCause, response.getStatus()));
+        }
+    }
+
+    protected String getUsernameForRequest(HttpServletRequest request) {
+        Principal userPrincipal = request.getUserPrincipal();
+        return (userPrincipal != null ? userPrincipal.getName() : null);
+    }
+
+
 
     private class ContextRefreshListener implements ApplicationListener<ContextRefreshedEvent> {
 

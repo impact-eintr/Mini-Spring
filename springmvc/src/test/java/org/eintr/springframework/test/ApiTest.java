@@ -12,6 +12,8 @@ import org.eintr.springframework.aop.framework.JdkDynamicAopProxy;
 import org.eintr.springframework.aop.framework.ProxyFactory;
 import org.eintr.springframework.aop.framework.ReflectiveMethodInvocation;
 import org.eintr.springframework.aop.framework.adapter.MethodAdviceInterceptor;
+import org.eintr.springframework.context.ApplicationContext;
+import org.eintr.springframework.context.ConfigurableApplicationContext;
 import org.eintr.springframework.context.support.ClassPathXmlApplicationContext;
 import org.eintr.springframework.core.convert.converter.Converter;
 import org.eintr.springframework.core.convert.support.StringToNumberConverterFactory;
@@ -29,7 +31,7 @@ public class ApiTest {
 	@Test
 	public void test_xml() {
 		// 1.初始化 BeanFactory
-		ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:spring.xml");
+		ConfigurableApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:spring.xml");
 		applicationContext.registerShutdownHook();
 
 		// 2. 发布一个事件

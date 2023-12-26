@@ -192,17 +192,14 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 					BeanReference beanReference = (BeanReference) value;
 					value = getBean(beanReference.getBeanName());
 				} else { // 类型转换
-					Class<?> sourceType = value.getClass();
-					Type t = TypeUtil.getFieldType(bean.getClass(), name);
-					Class<?> targetType = (Class<?>) TypeUtil.getFieldType(bean.getClass(), name);
 					ConversionService conversionService = new DefaultConversionService();
-					if (conversionService != null) {
-						if (conversionService.canConvert(sourceType, targetType)) {
-							value = conversionService.convert(value, targetType);
-						}
-					}
-
-				}
+                    Class<?> sourceType = value.getClass();
+					Type t = TypeUtil.getFieldType(bean.getClass(), name);
+                    Class<?> targetType = TypeUtil.getFieldType(bean.getClass(), name).getClass();
+                    if (conversionService.canConvert(sourceType, targetType)) {
+                        value = conversionService.convert(value, targetType);
+                    }
+                }
 				BeanUtil.setFieldValue(bean, name, value);
 			}
 		} catch (Exception e) {

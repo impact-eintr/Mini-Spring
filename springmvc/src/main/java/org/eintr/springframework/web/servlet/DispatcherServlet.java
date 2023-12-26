@@ -7,9 +7,14 @@ import org.eintr.springframework.core.io.ClassPathResource;
 import org.eintr.springframework.util.ClassUtils;
 import org.eintr.springframework.util.PropertiesLoaderUtils;
 import org.eintr.springframework.util.StringUtils;
+import org.eintr.springframework.util.WebUtils;
 
+import javax.servlet.DispatcherType;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class DispatcherServlet extends FrameworkServlet {
 
@@ -84,6 +89,27 @@ public class DispatcherServlet extends FrameworkServlet {
     /** List of ViewResolvers used by this servlet. */
     private List<ViewResolver> viewResolvers;
 
+    /**
+     * Request attribute to hold the current web application context.
+     * Otherwise only the global web app context is obtainable by tags etc.
+     */
+    public static final String WEB_APPLICATION_CONTEXT_ATTRIBUTE = DispatcherServlet.class.getName() + ".CONTEXT";
+
+    /**
+     * Request attribute to hold the current LocaleResolver, retrievable by views.
+     */
+    public static final String LOCALE_RESOLVER_ATTRIBUTE = DispatcherServlet.class.getName() + ".LOCALE_RESOLVER";
+
+    /**
+     * Request attribute to hold the current ThemeResolver, retrievable by views.
+     */
+    public static final String THEME_RESOLVER_ATTRIBUTE = DispatcherServlet.class.getName() + ".THEME_RESOLVER";
+
+    /**
+     * Request attribute to hold the current ThemeSource, retrievable by views.
+     */
+    public static final String THEME_SOURCE_ATTRIBUTE = DispatcherServlet.class.getName() + ".THEME_SOURCE";
+
     private static final String DEFAULT_STRATEGIES_PATH = "DispatcherServlet.properties";
 
 
@@ -108,6 +134,8 @@ public class DispatcherServlet extends FrameworkServlet {
     protected void onRefresh(ApplicationContext context) {
         initStrategies(context);
     }
+
+
 
     protected void initStrategies(ApplicationContext context) {
         // FIXME
@@ -261,8 +289,98 @@ public class DispatcherServlet extends FrameworkServlet {
         }
     }
 
+    @Override
+    protected void doService(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        logRequest(request);
+
+
+        // Make framework objects available to handlers and view objects.
+        request.setAttribute(WEB_APPLICATION_CONTEXT_ATTRIBUTE, getWebApplicationContext());
+        request.setAttribute(LOCALE_RESOLVER_ATTRIBUTE, this.localeResolver);
+        request.setAttribute(THEME_RESOLVER_ATTRIBUTE, this.themeResolver);
+        //request.setAttribute(THEME_SOURCE_ATTRIBUTE, getThemeSource());
+
+        try {
+            doDispatch(request, response);
+        } finally {
+
+        }
+    }
+
+
+    private void logRequest(HttpServletRequest request) {
+        String params;
+        params = request.getParameterMap().entrySet().stream()
+                .map(entry -> entry.getKey() + ":" + Arrays.toString(entry.getValue()))
+                .collect(Collectors.joining(", "));
+        String queryString = request.getQueryString();
+        String queryClause = (StringUtils.hasLength(queryString) ? "?" + queryString : "");
+        String dispatchType = (!request.getDispatcherType().equals(DispatcherType.REQUEST) ?
+                "\"" + request.getDispatcherType().name() + "\" dispatch for " : "");
+        String message = (dispatchType + request.getMethod() + " \"" + getRequestUri(request) +
+                queryClause + "\", parameters={" + params + "}");
+        System.out.println(message);
+    }
+
+    protected void doDispatch(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        HttpServletRequest processedRequest = request;
+        HandlerExecutionChain mappedHandler = null;
+        try {
+
+            Exception dispatchException = null;
+            try {
+
+                // 将请求转换为 handler 对象
+                mappedHandler = getHandler(processedRequest);
+                if (mappedHandler == null) {
+                    noHandlerFound(processedRequest, response);
+                    return;
+                }
+                // TODO handler 转换为 HandlerAdapter 对象
+
+
+            } catch (Exception ex) {
+                dispatchException = ex;
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } catch (Throwable ex) {
+            ex.printStackTrace();
+        } finally {
+
+        }
+
+    }
+
+
+    protected HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
+        if (this.handlerMappings != null) {
+            for (HandlerMapping mapping : this.handlerMappings) {
+                HandlerExecutionChain handler = mapping.getHandler(request);
+                if (handler != null) {
+                    return handler;
+                }
+            }
+        }
+        return null;
+    }
+
+
+    protected void noHandlerFound(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        response.sendError(HttpServletResponse.SC_NOT_FOUND);
+    }
+
+
     protected Object createDefaultStrategy(ApplicationContext context, Class<?> clazz) {
         return context.getAutowireCapableBeanFactory().createBean(clazz);
+    }
+
+    private static String getRequestUri(HttpServletRequest request) {
+        String uri = (String) request.getAttribute(WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE);
+        if (uri == null) {
+            uri = request.getRequestURI();
+        }
+        return uri;
     }
 }
 

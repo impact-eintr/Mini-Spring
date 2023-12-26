@@ -7,6 +7,7 @@ import org.eintr.springframework.web.context.support.WebApplicationObjectSupport
 import org.eintr.springframework.web.servlet.HandlerExecutionChain;
 import org.eintr.springframework.web.servlet.HandlerInterceptor;
 import org.eintr.springframework.web.servlet.HandlerMapping;
+import org.eintr.springframework.web.util.UrlPathHelper;
 
 import javax.servlet.http.HttpServletRequest;
 import java.beans.Beans;
@@ -15,6 +16,10 @@ import java.util.List;
 
 public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
         implements HandlerMapping, BeanNameAware {
+
+    private Object rootHandler;
+
+    protected UrlPathHelper urlPathHelper = new UrlPathHelper();
 
     private final List<Object> interceptors = new ArrayList<>();
 
@@ -38,6 +43,15 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
     public void setDefaultHandler(Object defaultHandler) {
         this.defaultHandler = defaultHandler;
+    }
+
+    public Object getRootHandler() {
+        return this.rootHandler;
+    }
+
+
+    public void setRootHandler(Object handler) {
+        this.rootHandler = handler;
     }
 
     protected void initApplicationContext() throws BeansException {

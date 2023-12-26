@@ -10,12 +10,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
-    private final Map<String, Object> urlMap = new LinkedHashMap<String, Object>();
+    private final LinkedHashMap<String, Object> urlMap = new LinkedHashMap<>();
 
     public SimpleUrlHandlerMapping() {
-        //String defaultServletHandlerName  = getApplicationContext().getBean(DefaultServletHttpRequestHandler.class).getClass().getName();
-        //Map<String, String> urlMap = new LinkedHashMap<>();
-        //urlMap.put("/**", defaultServletHandlerName);
     }
 
     public SimpleUrlHandlerMapping(Map<String, ?> urlMap) {
