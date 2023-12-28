@@ -26,12 +26,16 @@ public class ClassPathScanningCandidateComponentProvider {
         Set<BeanDefinition> candidates = new LinkedHashSet<>();
         for (Class<? extends Annotation> annotation : annotations) {
             Set<Class<?>> classes = ClassUtil.scanPackageByAnnotation(basePackage, annotation);
-            if (!annotation.isAnnotationPresent(Controller.class))
-                for (Class<?> clazz : classes) candidates.add(new BeanDefinition(clazz));
-            else for (Class<?> clazz : classes) {
-                BeanDefinition beanDefinition = new BeanDefinition(clazz);
-                beanDefinition.setIsController(true);
-                candidates.add(beanDefinition);
+            if (annotation.isAnnotationPresent(Controller.class)) {
+                for (Class<?> clazz : classes) {
+                    candidates.add(new BeanDefinition(clazz));
+                }
+            } else {
+                for (Class<?> clazz : classes) {
+                    BeanDefinition beanDefinition = new BeanDefinition(clazz);
+                    beanDefinition.setIsController(true);
+                    candidates.add(beanDefinition);
+                }
             }
         }
         return candidates;

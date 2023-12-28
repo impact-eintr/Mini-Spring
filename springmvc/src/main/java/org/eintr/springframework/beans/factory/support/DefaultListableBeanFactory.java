@@ -67,6 +67,22 @@ public class DefaultListableBeanFactory extends AbstructAutowireCapableBeanFacto
 	}
 
 	@Override
+	public String[] getBeanNamesForType(Class<?> type) {
+		// 从容器中获取 类型对应的 beanName 列表
+		List<String> resolvedBeanNames = new ArrayList<>();
+		beanDefinitionMap.forEach((name, beanDefinition) -> {
+			if (type.isAssignableFrom(beanDefinition.getBeanClass())) {
+				resolvedBeanNames.add(name);
+			}
+		});
+		// 不为空返回
+		if (!resolvedBeanNames.isEmpty()) {
+			return resolvedBeanNames.toArray(new String[0]);
+		}
+		return null;
+	}
+
+	@Override
 	public <T> Map<String, T> getBeansOfType(Class<T> type) throws BeansException {
 		Map<String, T> result = new HashMap<>();
 		beanDefinitionMap.forEach((beanName, beanDefinition)->{

@@ -107,4 +107,15 @@ public class ClassUtils {
         }
 
     }
+
+
+    public static Class<?> getUserClass(Class<?> clazz) {
+        if (clazz.getName().contains(CGLIB_CLASS_SEPARATOR)) {
+            Class<?> superclass = clazz.getSuperclass();
+            if (superclass != null && superclass != Object.class) {
+                return superclass;
+            }
+        }
+        return clazz;
+    }
 }

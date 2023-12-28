@@ -87,6 +87,11 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
         }
     }
 
+
+    public UrlPathHelper getUrlPathHelper() {
+        return this.urlPathHelper;
+    }
+
     @Override
     public final HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
         // 将 request 进行搜索找到对应的 handler 对象
@@ -98,7 +103,29 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
             return null;
         }
 
+        // handler 是否是 String 类型
+        if (handler instanceof String) {
+            // handler 是字符串类型从容器中获取对象
+            String handlerName = (String) handler;
+            handler = getApplicationContext().getBean(handlerName);
+        }
+
         HandlerExecutionChain executionChain = null;
+
+
+        // 跨域处理
+        // 对handler的跨域判断
+        // 对请求的跨域判断
+        //if (hasCorsConfigurationSource(handler) || CorsUtils.isPreFlightRequest(request)) {
+        //    // 从请求中获取跨域配置
+        //    CorsConfiguration config = (this.corsConfigurationSource != null ? this//.corsConfigurationSource.getCorsConfiguration(request) : null);
+        //    // 从 handler中获取跨域配置
+        //    CorsConfiguration handlerConfig = getCorsConfiguration(handler, request);
+        //    // 确定最终的跨域配置
+        //    config = (config != null ? config.combine(handlerConfig) : handlerConfig);
+        //    // executionChain 对象添加跨域配置
+        //    executionChain = getCorsHandlerExecutionChain(request, executionChain, config);
+        //}
 
         return executionChain;
     }

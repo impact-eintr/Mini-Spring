@@ -5,4 +5,5 @@
        xsi:schemaLocation="http://www.springframework.org/schema/mvc ">
 
     <mvc:default-servlet-handler/>
+    <context:component-scan base-package="org.eintr.springframework.test.web"/>
 </beans>
