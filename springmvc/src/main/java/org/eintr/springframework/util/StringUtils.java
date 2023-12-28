@@ -1325,4 +1325,12 @@ public abstract class StringUtils {
         return arrayToDelimitedString(arr, ",");
     }
 
+
+    public static Boolean isNotBlack(String str){
+        if (str == null || "".equals(str)){
+            return false;
+        }else{
+            return true;
+        }
+    }
 }

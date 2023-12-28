@@ -109,6 +109,12 @@ public class ClassUtils {
     }
 
 
+    public static Class<?> getUserClass(Object instance) {
+        Assert.notNull(instance, "Instance must not be null");
+        return getUserClass(instance.getClass());
+    }
+
+
     public static Class<?> getUserClass(Class<?> clazz) {
         if (clazz.getName().contains(CGLIB_CLASS_SEPARATOR)) {
             Class<?> superclass = clazz.getSuperclass();

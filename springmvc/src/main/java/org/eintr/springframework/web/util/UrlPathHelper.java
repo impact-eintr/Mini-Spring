@@ -17,7 +17,7 @@ public class UrlPathHelper {
     /**
      * 是否全路径标记
      */
-    private boolean alwaysUseFullPath = false;
+    private boolean alwaysUseFullPath = true;
 
     /**
      * 是否需要 decode

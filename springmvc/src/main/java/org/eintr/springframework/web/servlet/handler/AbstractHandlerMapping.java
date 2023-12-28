@@ -10,7 +10,6 @@ import org.eintr.springframework.web.servlet.HandlerMapping;
 import org.eintr.springframework.web.util.UrlPathHelper;
 
 import javax.servlet.http.HttpServletRequest;
-import java.beans.Beans;
 import java.util.ArrayList;
 import java.util.List;
 

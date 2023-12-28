@@ -178,4 +178,30 @@ public abstract class WebUtils {
         HttpSession session = request.getSession(false);
         return (session != null ? session.getId() : null);
     }
+
+    private static String URL_SPLIT =  "/";
+    private static String URL_PATTERN_ALL = "*";
+
+    /**
+     * 格式化URL
+     * @param url
+     * @return
+     */
+    public static String formatUrl(String url){
+        String formatUrl = "";
+        if (!StringUtils.isNotBlack(url) || URL_SPLIT.equals(url)){
+            return url;
+        }
+
+        formatUrl = URL_SPLIT + url + URL_SPLIT;
+        return formatUrl.replace("//",URL_SPLIT);
+    }
+
+    /**
+     * 获取*
+     * @return
+     */
+    public static String getUrlPatternAll(){
+        return URL_PATTERN_ALL;
+    }
 }

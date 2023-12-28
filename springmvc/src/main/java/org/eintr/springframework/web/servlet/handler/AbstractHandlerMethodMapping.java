@@ -1,18 +1,23 @@
 package org.eintr.springframework.web.servlet.handler;
 
-import com.sun.org.apache.xerces.internal.impl.xpath.regex.Match;
+import cn.hutool.core.lang.Assert;
 import org.eintr.springframework.annotation.mvc.RequestMapping;
 import org.eintr.springframework.beans.factory.InitializingBean;
-import org.eintr.springframework.util.BeanFactoryUtils;
-import org.eintr.springframework.util.BeanUtils;
+
+import org.eintr.springframework.core.convert.support.StringToNumberConverterFactory;
 import org.eintr.springframework.util.ClassUtils;
+import org.eintr.springframework.util.LinkedMultiValueMap;
+import org.eintr.springframework.util.MultiValueMap;
+import org.eintr.springframework.util.WebUtils;
+import org.eintr.springframework.web.context.WebApplicationContext;
 import org.eintr.springframework.web.method.HandlerMethod;
+import org.eintr.springframework.web.method.RequestMappingInfo;
+import org.eintr.springframework.web.util.UrlPathHelper;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMapping implements InitializingBean {
@@ -56,79 +61,51 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 
     protected void detectHandlerMethods(Object handler) {
-        // 获取 handler 的类型
-        Class<?> handlerType = (handler instanceof String ?
-                getApplicationContext().getBean((String) handler).getClass()
-                : handler.getClass());
+        Object controllerInstance = (handler instanceof String ?
+                getApplicationContext().getBean((String) handler) : handler);
+        //获取类上的@RequestMapping的value值
+        String classUri = null;
+        if (controllerInstance.getClass().isAnnotationPresent(RequestMapping.class)){
+            classUri = controllerInstance.getClass().getDeclaredAnnotation(RequestMapping.class).value();
+        }
 
-        if (handlerType != null) {
-            //获取类上的@RequestMapping的value值
-            String classUri = null;
-            // 反射加载类
-            //Class<?> userType = ClassUtils.getUserClass(handlerType);
-            //Object controllerInstance = null;
+        String methodUri;
+        String requestMethod;
+        RequestMappingInfo request;
+        for(Method method : controllerInstance.getClass().getDeclaredMethods()) {
+            //获取controller中所有带@RequestMapping的方法
+            if(!method.isAnnotationPresent(RequestMapping.class)) {
+                return;
+            }
 
-            //if (controllerInstance.getClass().isAnnotationPresent(RequestMapping.class)){
-            //    classUri = controllerInstance.getClass().getDeclaredAnnotation(RequestMapping.class).value();
-            //}
+            RequestMapping requestMapping = method.getAnnotation(RequestMapping.class);
+            methodUri = requestMapping.value();
+            requestMethod = requestMapping.method().name();
+            //将适用的方法封装成请求体
+            request = new RequestMappingInfo(
+                    joinFullUri(classUri, methodUri),
+                    requestMethod);
 
-            ////遍历所有的Controller的方法
-            //String methodUri;
-            //String requestMethod;
-            //Request request;
-            //for(Method method:controllerInstance.getClass().getDeclaredMethods()) {
-            //    //获取controller中所有带@RequestMapping的方法
-            //    if(!method.isAnnotationPresent(RequestMapping.class)) {
-            //        return;
-            //    }
-
-            //    RequestMapping requestMapping = method.getAnnotation(RequestMapping.class);
-            //    methodUri = requestMapping.value();
-            //    requestMethod = requestMapping.method().name();
-            //    //将适用的方法封装成请求体
-            //    request = new Request(joinFullUri(classUri,methodUri),requestMethod);
-
-            //    //将handler封装成对象
-            //    RequestHandler requestHandler =new RequestHandler(controllerInstance,method);
-            //    requestHandlerMap.put(request, requestHandler);
-            //}
-
-
-
-
-
-
-
-
-
-
-
-
-
-            //Map<Method, T> methods = MethodIntrospector.selectMethods(userType,
-            //        (MethodIntrospector.MetadataLookup<T>) method -> {
-            //            try {
-            //                // 处理单个 method
-            //                return getMappingForMethod(method, userType);
-            //            }
-            //            catch (Throwable ex) {
-            //                throw new IllegalStateException("Invalid mapping on handler class [" +
-            //                        userType.getName() + "]: " + method, ex);
-            //            }
-            //        });
-
-            //// 进行 handlerMethod 注册
-            //methods.forEach((method, mapping) -> {
-            //    // 获取执行方法,
-            //    Method invocableMethod = AopUtils.selectInvocableMethod(method, userType);
-            //    registerHandlerMethod(handler, invocableMethod, mapping);
-            //});
+            registerHandlerMethod(handler, method, (T) request);
         }
     }
 
 
+    protected void registerHandlerMethod(Object handler, Method method, T mapping) {
+        this.mappingRegistry.register(mapping, handler, method);
+    }
 
-
+    /**
+     * 对server.base.path、类上的@RequestMapping的value、方法上的@RequestMapping的value进行拼接
+     * @param classUri 类上的@RequestMapping的value
+     * @param methodUri 方法上的@RequestMapping的value
+     * @return
+     */
+    public String joinFullUri(String classUri,String methodUri) {
+        String classPath = WebUtils.formatUrl(classUri);
+        String methodPath = WebUtils.formatUrl(methodUri);
+        return WebUtils.formatUrl(classPath + methodPath);
+    }
 
     private final MappingRegistry mappingRegistry = new MappingRegistry();
 
@@ -143,8 +120,8 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
         try {
             // 寻找 handler method
             HandlerMethod handlerMethod = lookupHandlerMethod(lookupPath, request);
-            return null;
             //return (handlerMethod != null ? handlerMethod.createWithResolvedBean() : null);
+            return handlerMethod;
         }
         finally {
             // 释放锁
@@ -153,15 +130,86 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
     }
 
 
+    protected HandlerMethod createHandlerMethod(Object handler, Method method) {
+        // 是否是字符串
+        if (handler instanceof String) {
+            // 创建对象
+            return new HandlerMethod((String) handler,
+                    getApplicationContext().getAutowireCapableBeanFactory(), method);
+        }
+        return new HandlerMethod(handler, method);
+    }
+
+    protected abstract String getMappingPath(T mapping);
+
     protected HandlerMethod lookupHandlerMethod(String lookupPath, HttpServletRequest request) throws Exception {
+        List<Match> matches = new ArrayList<>();
+        // 从 路由映射表 获取
+        List<T> directPathMatches = this.mappingRegistry.getMappingsByUrl(lookupPath);
+        // 如果url对应的数据不为空
+
+
         return null;
     }
-        List<Match> matches = new ArrayList<>();
-
-    }
-
     class MappingRegistry {
+
+        /**
+         * key:mapping
+         * value: mapping registration
+         */
+        private final Map<T, MappingRegistration<T>> registry = new HashMap<>();
+
+        /**
+         * key: mapping
+         * value: handlerMethod
+         */
+        private final Map<T, HandlerMethod> mappingLookup = new LinkedHashMap<>();
+
+        /**
+         * key: url
+         * value: list mapping
+         */
+        private final MultiValueMap<String, T> urlLookup = new LinkedMultiValueMap<>();
+
+        /**
+         * key: name
+         * value: handler method
+         */
+        private final Map<String, List<HandlerMethod>> nameLookup = new ConcurrentHashMap<>();
+
+        /**
+         * key:handler method
+         * value: 跨域配置
+         */
+        //private final Map<HandlerMethod, CorsConfiguration> corsLookup = new ConcurrentHashMap<>();
+
+        /**
+         * 读写锁
+         */
         private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+
+        /**
+         * Return all mappings and handler methods. Not thread-safe.
+         * @see #acquireReadLock()
+         */
+        public Map<T, HandlerMethod> getMappings() {
+            return this.mappingLookup;
+        }
+
+        /**
+         * Return matches for the given URL path. Not thread-safe.
+         * @see #acquireReadLock()
+         */
+        public List<T> getMappingsByUrl(String urlPath) {
+            return this.urlLookup.get(urlPath);
+        }
+
+        /**
+         * Return handler methods by mapping name. Thread-safe for concurrent use.
+         */
+        public List<HandlerMethod> getHandlerMethodsByMappingName(String mappingName) {
+            return this.nameLookup.get(mappingName);
+        }
 
         /**
          * Acquire the read lock when using getMappings and getMappingsByUrl.
@@ -177,7 +225,180 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
             this.readWriteLock.readLock().unlock();
         }
 
-        public <T> void register(T mapping, Object handler, Method method) {
+        public void register(T mapping, Object handler, Method method) {
+            this.readWriteLock.writeLock().lock();
+            try {
+                // handler method 创建
+                HandlerMethod handlerMethod = createHandlerMethod(handler, method);
+                // 验证 method mapping
+                validateMethodMapping(handlerMethod, mapping);
+                // 放入缓存
+                this.mappingLookup.put(mapping, handlerMethod);
+
+                // 通过 requestMappingInfo 找到 url
+                List<String> directUrls = getDirectUrls(mapping);
+                for (String url : directUrls) {
+                    this.urlLookup.add(url, mapping);
+                }
+
+
+                String name = ((handler instanceof String) ?
+                        (String) handler : handler.getClass().getName())
+                        +"#"+method.getName();
+                // 设置 handlerMethod + name 的关系
+                addMappingName(name, handlerMethod);
+
+                this.registry.put(mapping, new MappingRegistration<>(
+                        mapping, handlerMethod, directUrls, name));
+            }
+            finally {
+                this.readWriteLock.writeLock().unlock();
+            }
         }
 
+        private void validateMethodMapping(HandlerMethod handlerMethod, T mapping) {
+            // Assert that the supplied mapping is unique.
+            // 从缓存中获取
+            HandlerMethod existingHandlerMethod = this.mappingLookup.get(mapping);
+            // 是否为空 , 是否相同
+            if (existingHandlerMethod != null && !existingHandlerMethod.equals(handlerMethod)) {
+                throw new IllegalStateException("Ambiguous mapping. Cannot map method \n");
+            }
+        }
+
+        private List<String> getDirectUrls(T mapping) {
+            List<String> urls = new ArrayList<>(1);
+            urls.add(getMappingPath(mapping));
+            return urls;
+        }
+
+        private void addMappingName(String name, HandlerMethod handlerMethod) {
+            List<HandlerMethod> oldList = this.nameLookup.get(name);
+            if (oldList == null) {
+                oldList = Collections.emptyList();
+            }
+
+            for (HandlerMethod current : oldList) {
+                if (handlerMethod.equals(current)) {
+                    return;
+                }
+            }
+
+            List<HandlerMethod> newList = new ArrayList<>(oldList.size() + 1);
+            newList.addAll(oldList);
+            newList.add(handlerMethod);
+            this.nameLookup.put(name, newList);
+        }
+
+        public void unregister(T mapping) {
+            this.readWriteLock.writeLock().lock();
+            try {
+                MappingRegistration<T> definition = this.registry.remove(mapping);
+                if (definition == null) {
+                    return;
+                }
+
+                this.mappingLookup.remove(definition.getMapping());
+
+                for (String url : definition.getDirectUrls()) {
+                    List<T> list = this.urlLookup.get(url);
+                    if (list != null) {
+                        list.remove(definition.getMapping());
+                        if (list.isEmpty()) {
+                            this.urlLookup.remove(url);
+                        }
+                    }
+                }
+
+                removeMappingName(definition);
+            }
+            finally {
+                this.readWriteLock.writeLock().unlock();
+            }
+        }
+
+        private void removeMappingName(MappingRegistration<T> definition) {
+            String name = definition.getMappingName();
+            if (name == null) {
+                return;
+            }
+            HandlerMethod handlerMethod = definition.getHandlerMethod();
+            List<HandlerMethod> oldList = this.nameLookup.get(name);
+            if (oldList == null) {
+                return;
+            }
+            if (oldList.size() <= 1) {
+                this.nameLookup.remove(name);
+                return;
+            }
+            List<HandlerMethod> newList = new ArrayList<>(oldList.size() - 1);
+            for (HandlerMethod current : oldList) {
+                if (!current.equals(handlerMethod)) {
+                    newList.add(current);
+                }
+            }
+            this.nameLookup.put(name, newList);
+        }
+    }
+
+
+    private class Match {
+
+        private final T mapping;
+
+        private final HandlerMethod handlerMethod;
+
+        public Match(T mapping, HandlerMethod handlerMethod) {
+            this.mapping = mapping;
+            this.handlerMethod = handlerMethod;
+        }
+
+        @Override
+        public String toString() {
+            return this.mapping.toString();
+        }
+    }
+
+
+    private static class MappingRegistration<T> {
+
+        private final T mapping;
+
+        private final HandlerMethod handlerMethod;
+
+        private final List<String> directUrls;
+
+
+        private final String mappingName;
+
+        public MappingRegistration(T mapping, HandlerMethod handlerMethod,
+                                    List<String> directUrls,  String mappingName) {
+
+            Assert.notNull(mapping, "Mapping must not be null");
+            Assert.notNull(handlerMethod, "HandlerMethod must not be null");
+            this.mapping = mapping;
+            this.handlerMethod = handlerMethod;
+            this.directUrls = (directUrls != null ? directUrls : Collections.emptyList());
+            this.mappingName = mappingName;
+        }
+
+
+        public T getMapping() {
+            return this.mapping;
+        }
+
+        public HandlerMethod getHandlerMethod() {
+            return this.handlerMethod;
+        }
+
+        public List<String> getDirectUrls() {
+            return this.directUrls;
+        }
+
+
+        public String getMappingName() {
+            return this.mappingName;
+        }
+    }
 }
+
