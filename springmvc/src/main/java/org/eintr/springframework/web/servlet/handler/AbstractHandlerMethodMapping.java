@@ -2,13 +2,11 @@ package org.eintr.springframework.web.servlet.handler;
 
 import cn.hutool.core.lang.Assert;
 import org.eintr.springframework.annotation.mvc.RequestMapping;
+import org.eintr.springframework.annotation.mvc.RequestMethod;
 import org.eintr.springframework.beans.factory.InitializingBean;
 
 import org.eintr.springframework.core.convert.support.StringToNumberConverterFactory;
-import org.eintr.springframework.util.ClassUtils;
-import org.eintr.springframework.util.LinkedMultiValueMap;
-import org.eintr.springframework.util.MultiValueMap;
-import org.eintr.springframework.util.WebUtils;
+import org.eintr.springframework.util.*;
 import org.eintr.springframework.web.context.WebApplicationContext;
 import org.eintr.springframework.web.method.HandlerMethod;
 import org.eintr.springframework.web.method.RequestMappingInfo;
@@ -20,7 +18,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMapping implements InitializingBean {
+public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMapping
+        implements InitializingBean {
 
 
     @Override
@@ -70,7 +69,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
         }
 
         String methodUri;
-        String requestMethod;
+        RequestMethod requestMethod;
         RequestMappingInfo request;
         for(Method method : controllerInstance.getClass().getDeclaredMethods()) {
             //获取controller中所有带@RequestMapping的方法
@@ -80,7 +79,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
             RequestMapping requestMapping = method.getAnnotation(RequestMapping.class);
             methodUri = requestMapping.value();
-            requestMethod = requestMapping.method().name();
+            requestMethod = RequestMethod.valueOf(requestMapping.method().name());
             //将适用的方法封装成请求体
             request = new RequestMappingInfo(
                     joinFullUri(classUri, methodUri),
@@ -147,10 +146,66 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
         // 从 路由映射表 获取
         List<T> directPathMatches = this.mappingRegistry.getMappingsByUrl(lookupPath);
         // 如果url对应的数据不为空
+        if (directPathMatches != null) {
+            addMatchingMappings(directPathMatches, matches, request);
+        }
+        if (matches.isEmpty()) {
+            addMatchingMappings(this.mappingRegistry.getMappings().keySet(), matches, request);
+        }
 
+        if (!matches.isEmpty()) {
 
-        return null;
+            Comparator<Match> comparator = new MatchComparator(getMappingComparator(request));
+            Match bestMatch = matches.get(0);
+            if (matches.size() > 1) {
+
+                if (CorsUtils.isPreFlightRequest(request)) {
+                    // FIXME 处理跨域
+                }
+
+                Match secondBestMatch = matches.get(1);
+                // 如果比较结果相同
+                if (comparator.compare(bestMatch, secondBestMatch) == 0) {
+                    // 第二个元素和第一个元素的比较过程
+                    Method m1 = bestMatch.handlerMethod.getMethod();
+                    Method m2 = secondBestMatch.handlerMethod.getMethod();
+                    String uri = request.getRequestURI();
+                    throw new IllegalStateException(
+                            "Ambiguous handler methods mapped for '" + uri + "': {" + m1 + ", " + m2 + "}");
+                }
+            }
+            request.setAttribute(BEST_MATCHING_HANDLER_ATTRIBUTE, bestMatch.handlerMethod);
+            handleMatch(bestMatch.mapping, lookupPath, request);
+            return bestMatch.handlerMethod;
+        } else {
+            return null;
+        }
     }
+
+    /**
+     * 添加匹配数据对象
+     * @param mappings requestMappingInfo
+     * @param matches 匹配表
+     * @param request 请求
+     */
+    private void addMatchingMappings(Collection<T> mappings, List<Match> matches, HttpServletRequest request) {
+        for (T mapping : mappings) {
+            // 抽象方法
+            // 通过抽象方法获取 match 结果
+            T match = getMatchingMapping(mapping, request);
+            // 是否为空
+            if (match != null) {
+                // 从 mappingLookup 获取结果并且插入到matches中
+                matches.add(new Match(match, this.mappingRegistry.getMappings().get(mapping)));
+            }
+        }
+    }
+
+    protected abstract T getMatchingMapping(T mapping, HttpServletRequest request);
+
+    protected abstract Comparator<T> getMappingComparator(HttpServletRequest request);
+
+
     class MappingRegistry {
 
         /**
@@ -398,6 +453,21 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
         public String getMappingName() {
             return this.mappingName;
+        }
+    }
+
+
+    private class MatchComparator implements Comparator<Match> {
+
+        private final Comparator<T> comparator;
+
+        public MatchComparator(Comparator<T> comparator) {
+            this.comparator = comparator;
+        }
+
+        @Override
+        public int compare(Match match1, Match match2) {
+            return this.comparator.compare(match1.mapping, match2.mapping);
         }
     }
 }

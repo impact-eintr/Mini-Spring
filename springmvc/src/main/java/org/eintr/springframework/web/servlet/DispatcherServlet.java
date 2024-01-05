@@ -337,7 +337,7 @@ public class DispatcherServlet extends FrameworkServlet {
                     return;
                 }
                 // TODO handler 转换为 HandlerAdapter 对象
-
+                System.out.println();
 
             } catch (Exception ex) {
                 dispatchException = ex;

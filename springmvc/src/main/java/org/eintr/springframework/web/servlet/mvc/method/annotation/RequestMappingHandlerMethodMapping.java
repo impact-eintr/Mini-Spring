@@ -8,6 +8,7 @@ import org.eintr.springframework.web.servlet.handler.MatchableHandlerMapping;
 import org.eintr.springframework.web.servlet.handler.RequestMatchResult;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Comparator;
 
 public class RequestMappingHandlerMethodMapping
         extends AbstractHandlerMethodMapping<RequestMappingInfo>
@@ -23,6 +24,16 @@ public class RequestMappingHandlerMethodMapping
     protected String getMappingPath(RequestMappingInfo mapping) {
         mapping.getRequestMethod();
         return mapping.getRequestPath();
+    }
+
+    @Override
+    protected RequestMappingInfo getMatchingMapping(RequestMappingInfo mapping, HttpServletRequest request) {
+        return mapping.getMatchingCondition(request);
+    }
+
+    @Override
+    protected Comparator<RequestMappingInfo> getMappingComparator(final HttpServletRequest request) {
+        return (info1, info2) -> info1.compareTo(info2, request);
     }
 
 

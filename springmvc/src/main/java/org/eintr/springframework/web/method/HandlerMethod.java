@@ -49,4 +49,8 @@ public class HandlerMethod {
         this.beanType = ClassUtils.getUserClass(bean);
         this.method = method;
     }
+
+    public Method getMethod() {
+        return this.method;
+    }
 }

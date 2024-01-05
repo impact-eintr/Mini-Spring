@@ -50,6 +50,17 @@ public class UrlPathHelper {
         }
     }
 
+
+    public String getLookupPathForRequest(HttpServletRequest request, String lookupPathAttributeName) {
+        if (lookupPathAttributeName != null) {
+            String result = (String) request.getAttribute(lookupPathAttributeName);
+            if (result != null) {
+                return result;
+            }
+        }
+        return getLookupPathForRequest(request);
+    }
+
     public String getPathWithinServletMapping(HttpServletRequest request) {
         // 获取 context-path + uri
         String pathWithinApp = getPathWithinApplication(request);
