@@ -3,9 +3,7 @@ package org.eintr.springframework.beans.factory.support;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.TypeUtil;
-import org.eintr.springframework.beans.BeansException;
-import org.eintr.springframework.beans.PropertyValue;
-import org.eintr.springframework.beans.PropertyValues;
+import org.eintr.springframework.beans.*;
 import org.eintr.springframework.beans.factory.*;
 import org.eintr.springframework.beans.factory.config.*;
 import org.eintr.springframework.core.convert.ConversionService;
@@ -182,6 +180,9 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 	// Bean属性填充 使用定义好的Beanfinition
 	protected void applyPropertyValues(String beanName, Object bean, BeanDefinition beanDefinition) {
 		try {
+
+			BeanWrapper bw = new BeanWrapperImpl(bean);
+
 			PropertyValues propertyValues = beanDefinition.getPropertyValues();
 			for (PropertyValue propertyValue : propertyValues.getPropertyValues()) {
 				String name = propertyValue.getName();
@@ -195,11 +196,23 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 					ConversionService conversionService = new DefaultConversionService();
                     Class<?> sourceType = value.getClass();
 					Type t = TypeUtil.getFieldType(bean.getClass(), name);
-                    Class<?> targetType = TypeUtil.getFieldType(bean.getClass(), name).getClass();
-                    if (conversionService.canConvert(sourceType, targetType)) {
-                        value = conversionService.convert(value, targetType);
-                    }
+					if (t != null) {
+						Class<?> targetType = t.getClass();
+						if (conversionService.canConvert(sourceType, targetType)) {
+							value = conversionService.convert(value, targetType);
+						}
+					} else {
+						// 获取写方法. (set) 方法
+						Method writeMethod = bw.getPropertyDescriptor(name).getWriteMethod();
+						if (writeMethod == null) {
+							throw new IllegalArgumentException("Autowire marker for property without write method: " + propertyValue);
+						} else {
+						}
+					}
+
                 }
+
+				// TODO 这里需要检验是否有 setter
 				BeanUtil.setFieldValue(bean, name, value);
 			}
 		} catch (Exception e) {

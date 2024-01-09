@@ -76,7 +76,15 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping
     protected Object buildPathExposingHandler(Object rawHandler, String bestMatchingPattern,
                                               String pathWithinMapping, Map<String, String> uriTemplateVariables) {
 
-        return null;
+        // 通过 handler对象创建 HandlerExecutionChain
+        HandlerExecutionChain chain = new HandlerExecutionChain(rawHandler);
+        // FIXME 添加 PathExposingHandlerInterceptor 拦截器
+        //chain.addInterceptor(new PathExposingHandlerInterceptor(bestMatchingPattern, //pathWithinMapping));
+        //if (!CollectionUtils.isEmpty(uriTemplateVariables)) {
+        //    // 添加 UriTemplateVariablesHandlerInterceptor 拦截器
+        //    chain.addInterceptor(new UriTemplateVariablesHandlerInterceptor(uriTemplateVariables));
+        //}
+        return chain;
     }
 
     @Override

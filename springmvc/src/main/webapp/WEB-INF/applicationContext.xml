@@ -6,4 +6,9 @@
 
     <mvc:default-servlet-handler/>
     <context:component-scan base-package="org.eintr.springframework.test.web"/>
+    <bean id="/api/hrm" class="org.eintr.springframework.test.web.HttpRequestHandlerImpl"/>
+
+    <bean class="org.eintr.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+        <property name="mapping" value="classpath:token.properties"/>
+    </bean>
 </beans>
