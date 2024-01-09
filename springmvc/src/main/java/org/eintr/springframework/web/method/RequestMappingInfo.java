@@ -62,7 +62,7 @@ public final class RequestMappingInfo {
 
     public boolean matchMethod(HttpServletRequest request) {
         RequestMethod method = RequestMethod.valueOf(request.getMethod());
-        return this.requestMethod.equals(method);
+        return this.methods.contains(method);
     }
 
     public int compareTo(RequestMappingInfo other, HttpServletRequest request) {

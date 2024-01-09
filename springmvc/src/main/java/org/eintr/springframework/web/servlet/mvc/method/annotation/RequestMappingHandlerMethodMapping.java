@@ -3,12 +3,16 @@ package org.eintr.springframework.web.servlet.mvc.method.annotation;
 import org.eintr.springframework.annotation.mvc.RequestMapping;
 import org.eintr.springframework.annotation.stereotype.Controller;
 import org.eintr.springframework.web.method.RequestMappingInfo;
+import org.eintr.springframework.web.servlet.HandlerMapping;
 import org.eintr.springframework.web.servlet.handler.AbstractHandlerMethodMapping;
 import org.eintr.springframework.web.servlet.handler.MatchableHandlerMapping;
 import org.eintr.springframework.web.servlet.handler.RequestMatchResult;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.Map;
+import java.util.Set;
 
 public class RequestMappingHandlerMethodMapping
         extends AbstractHandlerMethodMapping<RequestMappingInfo>
@@ -40,5 +44,13 @@ public class RequestMappingHandlerMethodMapping
     @Override
     public RequestMatchResult match(HttpServletRequest request, String pattern) {
         return null;
+    }
+
+    protected void handleMatch(RequestMappingInfo info, String lookupPath, HttpServletRequest request) {
+        super.handleMatch(info, lookupPath, request);
+
+        String bestPattern;
+        bestPattern = lookupPath;
+        request.setAttribute(BEST_MATCHING_PATTERN_ATTRIBUTE, bestPattern);
     }
 }

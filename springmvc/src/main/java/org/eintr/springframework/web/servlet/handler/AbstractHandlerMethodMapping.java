@@ -10,6 +10,7 @@ import org.eintr.springframework.util.*;
 import org.eintr.springframework.web.context.WebApplicationContext;
 import org.eintr.springframework.web.method.HandlerMethod;
 import org.eintr.springframework.web.method.RequestMappingInfo;
+import org.eintr.springframework.web.servlet.HandlerMapping;
 import org.eintr.springframework.web.util.UrlPathHelper;
 
 import javax.servlet.http.HttpServletRequest;
@@ -119,8 +120,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
         try {
             // 寻找 handler method
             HandlerMethod handlerMethod = lookupHandlerMethod(lookupPath, request);
-            //return (handlerMethod != null ? handlerMethod.createWithResolvedBean() : null);
-            return handlerMethod;
+            return (handlerMethod != null ? handlerMethod.createWithResolvedBean() : null);
         }
         finally {
             // 释放锁
@@ -204,6 +204,10 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
     protected abstract T getMatchingMapping(T mapping, HttpServletRequest request);
 
     protected abstract Comparator<T> getMappingComparator(HttpServletRequest request);
+
+    protected void handleMatch(T mapping, String lookupPath, HttpServletRequest request) {
+        request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, lookupPath);
+    }
 
 
     class MappingRegistry {

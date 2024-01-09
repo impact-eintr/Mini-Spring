@@ -50,7 +50,28 @@ public class HandlerMethod {
         this.method = method;
     }
 
+
+    private HandlerMethod(HandlerMethod handlerMethod, Object handler) {
+        Assert.notNull(handlerMethod, "HandlerMethod is required");
+        Assert.notNull(handler, "Handler object is required");
+        this.bean = handler;
+        this.beanFactory = handlerMethod.beanFactory;
+        this.beanType = handlerMethod.beanType;
+        this.method = handlerMethod.method;
+    }
+
     public Method getMethod() {
         return this.method;
+    }
+
+
+    public HandlerMethod createWithResolvedBean() {
+        Object handler = this.bean;
+        if (this.bean instanceof String) {
+            Assert.state(this.beanFactory != null, "Cannot resolve bean name without BeanFactory");
+            String beanName = (String) this.bean;
+            handler = this.beanFactory.getBean(beanName);
+        }
+        return new HandlerMethod(this, handler);
     }
 }

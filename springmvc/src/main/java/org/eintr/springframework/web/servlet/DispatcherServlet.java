@@ -4,12 +4,10 @@ import org.eintr.springframework.beans.factory.BeanInitializationException;
 import org.eintr.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.eintr.springframework.context.ApplicationContext;
 import org.eintr.springframework.core.io.ClassPathResource;
-import org.eintr.springframework.util.ClassUtils;
-import org.eintr.springframework.util.PropertiesLoaderUtils;
-import org.eintr.springframework.util.StringUtils;
-import org.eintr.springframework.util.WebUtils;
+import org.eintr.springframework.util.*;
 
 import javax.servlet.DispatcherType;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -227,6 +225,16 @@ public class DispatcherServlet extends FrameworkServlet {
     // 初始化 HandlerAdapters
     public void initHandlerAdapters(ApplicationContext context) {
         // 用于处理请求
+        this.handlerAdapters = null;
+        Map<String, HandlerAdapter> matchingBeans =
+                BeanFactoryUtils.beansOfTypeIncludingAncestors(context, HandlerAdapter.class);
+        if (!matchingBeans.isEmpty()) {
+          this.handlerAdapters = new ArrayList<>(matchingBeans.values());
+        }
+
+        if (this.handlerAdapters == null) {
+            this.handlerAdapters = getDefaultStrategies(context, HandlerAdapter.class);
+        }
     }
 
     // 初始化 HandlerExceptionResolvers
@@ -336,8 +344,23 @@ public class DispatcherServlet extends FrameworkServlet {
                     noHandlerFound(processedRequest, response);
                     return;
                 }
-                // TODO handler 转换为 HandlerAdapter 对象
-                System.out.println();
+                // handler 对象转换成 HandlerAdapter 对象
+                // Determine handler adapter for the current request.
+                HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
+
+                String method = request.getMethod();
+                boolean isGet = "GET".equals(method);
+                if (isGet || "HEAD".equals(method)) {
+                    long lastModified = ha.getLastModified(request, mappedHandler.getHandler());
+                    //if (new ServletWebRequest(request, response).checkNotModified(lastModified) && isGet) {
+                    //    return;
+                    //}
+                }
+
+                // TODO 处理拦截器
+
+                // 执行 HandlerAdapter的handle方法
+                ha.handle(processedRequest, response, mappedHandler.getHandler());
 
             } catch (Exception ex) {
                 dispatchException = ex;
@@ -363,6 +386,18 @@ public class DispatcherServlet extends FrameworkServlet {
             }
         }
         return null;
+    }
+
+    protected HandlerAdapter getHandlerAdapter(Object handler) throws ServletException {
+        if (this.handlerAdapters != null) {
+            for (HandlerAdapter adapter : this.handlerAdapters) {
+                if (adapter.supports(handler)) {
+                    return adapter;
+                }
+            }
+        }
+        throw new ServletException("No adapter for handler [" + handler +
+                "]: The DispatcherServlet configuration needs to include a HandlerAdapter that supports this handler");
     }
 
 

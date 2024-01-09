@@ -16,4 +16,12 @@ public abstract class CollectionUtils {
     public static boolean isEmpty( Collection<?> collection) {
         return (collection == null || collection.isEmpty());
     }
+
+
+    public static <E> void mergeArrayIntoCollection(Object array, Collection<E> collection) {
+        Object[] arr = ObjectUtils.toObjectArray(array);
+        for (Object elem : arr) {
+            collection.add((E) elem);
+        }
+    }
 }

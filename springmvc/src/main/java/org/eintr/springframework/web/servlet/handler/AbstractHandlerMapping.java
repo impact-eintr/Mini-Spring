@@ -1,8 +1,10 @@
 package org.eintr.springframework.web.servlet.handler;
 
+import com.sun.org.apache.xpath.internal.axes.OneStepIterator;
 import org.eintr.springframework.beans.BeansException;
 import org.eintr.springframework.beans.factory.BeanNameAware;
 import org.eintr.springframework.util.BeanFactoryUtils;
+import org.eintr.springframework.util.CorsUtils;
 import org.eintr.springframework.web.context.support.WebApplicationObjectSupport;
 import org.eintr.springframework.web.servlet.HandlerExecutionChain;
 import org.eintr.springframework.web.servlet.HandlerInterceptor;
@@ -81,8 +83,17 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
                 if (interceptor == null) {
                     throw new IllegalArgumentException("Entry number " + i + " in interceptors array is null");
                 }
-                //this.adaptedInterceptors.add(adaptInterceptor(interceptor));
+                this.adaptedInterceptors.add(adaptInterceptor(interceptor));
             }
+        }
+    }
+
+    protected HandlerInterceptor adaptInterceptor(Object interceptor) {
+        if (interceptor instanceof HandlerInterceptor) {
+            return (HandlerInterceptor) interceptor;
+        }
+        else {
+            throw new IllegalArgumentException("Interceptor type not supported: " + interceptor.getClass().getName());
         }
     }
 
@@ -109,12 +120,15 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
             handler = getApplicationContext().getBean(handlerName);
         }
 
-        HandlerExecutionChain executionChain = null;
+        HandlerExecutionChain executionChain = getHandlerExecutionChain(handler, request);
 
 
         // 跨域处理
         // 对handler的跨域判断
         // 对请求的跨域判断
+        if (CorsUtils.isPreFlightRequest(request)) {
+
+        }
         //if (hasCorsConfigurationSource(handler) || CorsUtils.isPreFlightRequest(request)) {
         //    // 从请求中获取跨域配置
         //    CorsConfiguration config = (this.corsConfigurationSource != null ? this//.corsConfigurationSource.getCorsConfiguration(request) : null);
@@ -128,4 +142,25 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
         return executionChain;
     }
+
+    protected HandlerExecutionChain getHandlerExecutionChain(Object handler, HttpServletRequest request) {
+        // 判断 handler 对象的类型是否是 HandlerExecutionChain, 如果不是会进行对象创建,如果是会进行强制转换
+        HandlerExecutionChain chain = (handler instanceof HandlerExecutionChain ?
+                (HandlerExecutionChain) handler : new HandlerExecutionChain(handler));
+        String lookupPath = this.urlPathHelper.getLookupPathForRequest(request, LOOKUP_PATH);
+        for (HandlerInterceptor interceptor : this.adaptedInterceptors) {
+            //if (interceptor instanceof MappedInterceptor) {
+            //    MappedInterceptor mappedInterceptor = (MappedInterceptor) interceptor;
+            //    // 验证url地址是否是需要进行拦截,如果需要就加入
+            //    if (mappedInterceptor.matches(lookupPath, this.pathMatcher)) {
+            //        chain.addInterceptor(mappedInterceptor.getInterceptor());
+            //    }
+            //}
+            //else {
+            //    chain.addInterceptor(interceptor);
+            //}
+        }
+        return chain;
+    }
 }
+
