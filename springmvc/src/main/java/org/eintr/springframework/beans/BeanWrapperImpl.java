@@ -5,11 +5,10 @@ import org.eintr.springframework.util.ReflectionUtils;
 import org.eintr.springframework.util.StringUtils;
 
 import java.beans.IntrospectionException;
-import java.beans.NameGenerator;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
-import java.util.HashSet;
-import java.util.Set;
+import java.security.*;
+import java.util.*;
 
 import static java.util.Locale.ENGLISH;
 
@@ -20,6 +19,8 @@ public class BeanWrapperImpl implements BeanWrapper {
 
     private PropertyValues pvs;
 
+    private AccessControlContext acc;
+
     public BeanWrapperImpl(Object object) {
         pvs = new PropertyValues();
         targetBean = object;
@@ -27,7 +28,7 @@ public class BeanWrapperImpl implements BeanWrapper {
 
     @Override
     public Object getWrappedInstance() {
-        return null;
+        return this.targetBean;
     }
 
     @Override
@@ -58,27 +59,37 @@ public class BeanWrapperImpl implements BeanWrapper {
     public PropertyDescriptor getPropertyDescriptor(String propertyName) throws BeansException {
         try {
             if (StringUtils.hasLength(propertyName)) {
-                // TODO 如何处理这里？？？？
                 Class<?> clazz = this.targetBean.getClass();
-                Method[] methods = clazz.getMethods();
-                for (Method method : methods) {
-                    if (("is"+capitalize(propertyName)).equals(method.getName())) {
+                List<Method> methods = new ArrayList<>();
+                List<String> methodNames = new ArrayList<>();
+                Collections.addAll(methods, clazz.getMethods());
+                methods.forEach((m) -> {
+                    methodNames.add(m.getName());
+                });
+                if (methodNames.contains("set"+capitalize(propertyName))) {
 
+                    if (methodNames.contains("is"+capitalize(propertyName))) {
+                        PropertyDescriptor pd = new PropertyDescriptor(propertyName,
+                                this.targetBean.getClass(),
+                                "is"+capitalize(propertyName),"set"+capitalize(propertyName) );
+                        return pd;
+                    } else if (methodNames.contains("get"+capitalize(propertyName))) {
+                        PropertyDescriptor pd = new PropertyDescriptor(propertyName,
+                                this.targetBean.getClass(),
+                                "get"+capitalize(propertyName),"set"+capitalize(propertyName) );
+                        pd.getWriteMethod();
+                        return pd;
+                    } else {
+                        throw new BeansException("no getter found");
                     }
                 }
-               // Method setermethod = clazz.getMethod(, clazz);
-               // Method isermethod = this.targetBean.getClass().getMethod("is"+capitalize(propertyName));
-               // Method getermethod = this.targetBean.getClass().getMethod("is"+capitalize(propertyName));
-               // PropertyDescriptor pd = new PropertyDescriptor(propertyName,
-               //         this.targetBean.getClass(), );
+                throw new BeansException("no setter found");
             }
 
             return null;
         }
         catch (IntrospectionException ex) {
             throw new BeansException("Failed to re-introspect class [" + this.targetBean.getClass().getName() + "]" + ex);
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -91,4 +102,66 @@ public class BeanWrapperImpl implements BeanWrapper {
     }
 
 
+
+    private class BeanPropertyHandler {
+
+        private final PropertyDescriptor pd;
+
+        public BeanPropertyHandler(PropertyDescriptor pd) {
+            this.pd = pd;
+        }
+
+
+        public Object getValue() throws Exception {
+            // 读取函数
+            final Method readMethod = this.pd.getReadMethod();
+            if (System.getSecurityManager() != null) {
+                AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
+                    ReflectionUtils.makeAccessible(readMethod);
+                    return null;
+                });
+                try {
+                    // 读取函数调用
+                    return AccessController.doPrivileged((PrivilegedExceptionAction<Object>) () ->
+                            readMethod.invoke(getWrappedInstance(), (Object[]) null), acc);
+                }
+                catch (PrivilegedActionException pae) {
+                    throw pae.getException();
+                }
+            }
+            else {
+                ReflectionUtils.makeAccessible(readMethod);
+                // 读取函数调用
+                return readMethod.invoke(getWrappedInstance(), (Object[]) null);
+            }
+        }
+
+        /**
+         * 设置属性
+         * @param value
+         * @throws Exception
+         */
+        public void setValue(final Object value) throws Exception {
+            final Method writeMethod = (this.pd instanceof GenericTypeAwarePropertyDescriptor ?
+                    ((GenericTypeAwarePropertyDescriptor) this.pd).getWriteMethodForActualAccess() :
+                    this.pd.getWriteMethod());
+            if (System.getSecurityManager() != null) {
+                AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
+                    ReflectionUtils.makeAccessible(writeMethod);
+                    return null;
+                });
+                try {
+                    AccessController.doPrivileged((PrivilegedExceptionAction<Object>) () ->
+                            writeMethod.invoke(getWrappedInstance(), value), acc);
+                }
+                catch (PrivilegedActionException ex) {
+                    throw ex.getException();
+                }
+            }
+            else {
+                ReflectionUtils.makeAccessible(writeMethod);
+                writeMethod.invoke(getWrappedInstance(), value);
+            }
+        }
+    }
 }

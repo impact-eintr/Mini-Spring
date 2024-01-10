@@ -6,9 +6,11 @@ import cn.hutool.core.util.TypeUtil;
 import org.eintr.springframework.beans.*;
 import org.eintr.springframework.beans.factory.*;
 import org.eintr.springframework.beans.factory.config.*;
+import org.eintr.springframework.core.MethodParameter;
 import org.eintr.springframework.core.convert.ConversionService;
 import org.eintr.springframework.core.convert.support.DefaultConversionService;
 
+import java.beans.PropertyDescriptor;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -203,16 +205,24 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 						}
 					} else {
 						// 获取写方法. (set) 方法
+						PropertyDescriptor pd = bw.getPropertyDescriptor(name);
+						if (pd == null) {
+							throw new IllegalArgumentException("Autowire marker for property without write method: " + propertyValue);
+						}
+						bw.set
 						Method writeMethod = bw.getPropertyDescriptor(name).getWriteMethod();
 						if (writeMethod == null) {
 							throw new IllegalArgumentException("Autowire marker for property without write method: " + propertyValue);
 						} else {
+							MethodParameter methodParameter = new MethodParameter(writeMethod, 0);
+							methodParameter.
+							writeMethod.invoke(value);
+							continue;
 						}
 					}
 
                 }
 
-				// TODO 这里需要检验是否有 setter
 				BeanUtil.setFieldValue(bean, name, value);
 			}
 		} catch (Exception e) {
