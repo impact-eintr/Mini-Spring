@@ -10,13 +10,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.OutputStreamWriter;
 
-@Component
 public class ControllerImpl implements Controller {
     @Override
     public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
         response.setStatus(HttpStatus.HTTP_OK);
         ServletOutputStream out = response.getOutputStream();
-        OutputStreamWriter ow = new OutputStreamWriter(out,"GB2312");
+        OutputStreamWriter ow = new OutputStreamWriter(out,"UTF8");
         ow.write("这是测试 ControllerImpl");
         ow.flush();
         ow.close();

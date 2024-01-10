@@ -77,7 +77,6 @@ public class BeanWrapperImpl implements BeanWrapper {
                         PropertyDescriptor pd = new PropertyDescriptor(propertyName,
                                 this.targetBean.getClass(),
                                 "get"+capitalize(propertyName),"set"+capitalize(propertyName) );
-                        pd.getWriteMethod();
                         return pd;
                     } else {
                         throw new BeansException("no getter found");
@@ -102,66 +101,11 @@ public class BeanWrapperImpl implements BeanWrapper {
     }
 
 
+    public AccessControlContext getAcc() {
+        return acc;
+    }
 
-    private class BeanPropertyHandler {
-
-        private final PropertyDescriptor pd;
-
-        public BeanPropertyHandler(PropertyDescriptor pd) {
-            this.pd = pd;
-        }
-
-
-        public Object getValue() throws Exception {
-            // 读取函数
-            final Method readMethod = this.pd.getReadMethod();
-            if (System.getSecurityManager() != null) {
-                AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
-                    ReflectionUtils.makeAccessible(readMethod);
-                    return null;
-                });
-                try {
-                    // 读取函数调用
-                    return AccessController.doPrivileged((PrivilegedExceptionAction<Object>) () ->
-                            readMethod.invoke(getWrappedInstance(), (Object[]) null), acc);
-                }
-                catch (PrivilegedActionException pae) {
-                    throw pae.getException();
-                }
-            }
-            else {
-                ReflectionUtils.makeAccessible(readMethod);
-                // 读取函数调用
-                return readMethod.invoke(getWrappedInstance(), (Object[]) null);
-            }
-        }
-
-        /**
-         * 设置属性
-         * @param value
-         * @throws Exception
-         */
-        public void setValue(final Object value) throws Exception {
-            final Method writeMethod = (this.pd instanceof GenericTypeAwarePropertyDescriptor ?
-                    ((GenericTypeAwarePropertyDescriptor) this.pd).getWriteMethodForActualAccess() :
-                    this.pd.getWriteMethod());
-            if (System.getSecurityManager() != null) {
-                AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
-                    ReflectionUtils.makeAccessible(writeMethod);
-                    return null;
-                });
-                try {
-                    AccessController.doPrivileged((PrivilegedExceptionAction<Object>) () ->
-                            writeMethod.invoke(getWrappedInstance(), value), acc);
-                }
-                catch (PrivilegedActionException ex) {
-                    throw ex.getException();
-                }
-            }
-            else {
-                ReflectionUtils.makeAccessible(writeMethod);
-                writeMethod.invoke(getWrappedInstance(), value);
-            }
-        }
+    public void setAcc(AccessControlContext acc) {
+        this.acc = acc;
     }
 }

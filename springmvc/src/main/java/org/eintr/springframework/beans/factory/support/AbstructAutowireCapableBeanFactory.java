@@ -10,10 +10,12 @@ import org.eintr.springframework.core.MethodParameter;
 import org.eintr.springframework.core.convert.ConversionService;
 import org.eintr.springframework.core.convert.support.DefaultConversionService;
 
+import java.beans.BeanDescriptor;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.Properties;
 
 public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFactory implements AutowireCapableBeanFactory {
 
@@ -183,7 +185,7 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 	protected void applyPropertyValues(String beanName, Object bean, BeanDefinition beanDefinition) {
 		try {
 
-			BeanWrapper bw = new BeanWrapperImpl(bean);
+			BeanWrapperImpl bw = new BeanWrapperImpl(bean);
 
 			PropertyValues propertyValues = beanDefinition.getPropertyValues();
 			for (PropertyValue propertyValue : propertyValues.getPropertyValues()) {
@@ -209,16 +211,14 @@ public abstract class AbstructAutowireCapableBeanFactory extends AbstractBeanFac
 						if (pd == null) {
 							throw new IllegalArgumentException("Autowire marker for property without write method: " + propertyValue);
 						}
-						bw.set
-						Method writeMethod = bw.getPropertyDescriptor(name).getWriteMethod();
-						if (writeMethod == null) {
-							throw new IllegalArgumentException("Autowire marker for property without write method: " + propertyValue);
-						} else {
-							MethodParameter methodParameter = new MethodParameter(writeMethod, 0);
-							methodParameter.
-							writeMethod.invoke(value);
-							continue;
+
+						final Method writeMethod = pd.getWriteMethod();
+						Class<?> targetType =  writeMethod.getParameterTypes()[0];
+						if (conversionService.canConvert(sourceType, targetType)) {
+							value = conversionService.convert(value, targetType);
 						}
+						new BeanPropertyHandler(bw, pd).setValue(value);
+						continue;
 					}
 
                 }
