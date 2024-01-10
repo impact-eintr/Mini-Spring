@@ -9,7 +9,8 @@
     <bean id="/api/hrm" class="org.eintr.springframework.test.web.HttpRequestHandlerImpl"/>
 
     <bean id="controllerImpl" class="org.eintr.springframework.test.web.ControllerImpl"/>
-    <bean name="handlerMapping" class="org.eintr.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
-        <property name="mappings" value="/api/hcm=controllerImpl"/>
+    <bean id="controllerOtherImpl" class="org.eintr.springframework.test.web.ControllerOtherImpl"/>
+    <bean id="handlerMapping" class="org.eintr.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+        <property name="mappings" value="/api/hcm=controllerImpl;/api/hcom=controllerOtherImpl"/>
     </bean>
 </beans>
