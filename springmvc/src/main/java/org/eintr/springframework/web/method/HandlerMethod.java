@@ -2,9 +2,16 @@ package org.eintr.springframework.web.method;
 
 import cn.hutool.core.lang.Assert;
 import org.eintr.springframework.beans.factory.BeanFactory;
+import org.eintr.springframework.core.MethodParameter;
 import org.eintr.springframework.util.ClassUtils;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class HandlerMethod {
 
@@ -21,10 +28,17 @@ public class HandlerMethod {
      */
     private final Class<?> beanType;
 
+    //FIXMW 增加汉书调用参数
+
+    private final MethodParameter[] parameters;
+
     /**
      * 处理方法
      */
     private final Method method;
+
+    // 桥接方法
+    private final Method bridgedMethod;
 
 
     public HandlerMethod(String beanName, BeanFactory beanFactory, Method method) {
@@ -38,6 +52,8 @@ public class HandlerMethod {
         }
         this.beanType = ClassUtils.getUserClass(beanType);
         this.method = method;
+        this.bridgedMethod = method;
+        this.parameters = initMethodParameters();
     }
 
 
@@ -48,6 +64,8 @@ public class HandlerMethod {
         this.beanFactory = null;
         this.beanType = ClassUtils.getUserClass(bean);
         this.method = method;
+        this.bridgedMethod = method;
+        this.parameters = initMethodParameters();
     }
 
 
@@ -58,12 +76,49 @@ public class HandlerMethod {
         this.beanFactory = handlerMethod.beanFactory;
         this.beanType = handlerMethod.beanType;
         this.method = handlerMethod.method;
+        this.bridgedMethod = handlerMethod.method;
+        this.parameters = initMethodParameters();
+    }
+
+    protected HandlerMethod(HandlerMethod handlerMethod) {
+        Assert.notNull(handlerMethod, "HandlerMethod is required");
+        this.bean = handlerMethod.bean;
+        this.beanFactory = handlerMethod.beanFactory;
+        this.beanType = handlerMethod.beanType;
+        this.method = handlerMethod.method;
+        this.bridgedMethod = handlerMethod.method;
+        this.parameters = handlerMethod.parameters;
+    }
+
+    public Object getBean() {
+        return bean;
     }
 
     public Method getMethod() {
         return this.method;
     }
 
+    public Class<?> getBeanType() {
+        return beanType;
+    }
+
+
+    public Method getBridgedMethod() {
+        return bridgedMethod;
+    }
+
+    public MethodParameter[] getMethodParameters() {
+        return this.parameters;
+    }
+
+    private MethodParameter[] initMethodParameters() {
+        int count = this.bridgedMethod.getParameterCount();
+        MethodParameter[] result = new MethodParameter[count];
+        for (int i = 0;i < count;i++) {
+            result[i] = new HandlerMethodParameter(i);
+        }
+        return result;
+    }
 
     public HandlerMethod createWithResolvedBean() {
         Object handler = this.bean;
@@ -74,4 +129,48 @@ public class HandlerMethod {
         }
         return new HandlerMethod(this, handler);
     }
+
+    protected void assertTargetBean(Method method, Object targetBean, Object[] args) {
+        Class<?> methodDeclaringClass = method.getDeclaringClass();
+        Class<?> targetBeanClass = targetBean.getClass();
+        if (!methodDeclaringClass.isAssignableFrom(targetBeanClass)) {
+            String text = "The mapped handler method class '" + methodDeclaringClass.getName() +
+                    "' is not an instance of the actual controller bean class '" +
+                    targetBeanClass.getName() + "'. If the controller requires proxying " +
+                    "(e.g. due to @Transactional), please use class-based proxying.";
+            throw new IllegalStateException(formatInvokeError(text, args));
+        }
+    }
+
+    protected String formatInvokeError(String text, Object[] args) {
+        String formattedArgs = IntStream.range(0, args.length)
+                .mapToObj(i -> (args[i] != null ?
+                        "[" + i + "] [type=" + args[i].getClass().getName() + "] [value=" + args[i] + "]" :
+                        "[" + i + "] [null]"))
+                .collect(Collectors.joining(",\n", " ", " "));
+        return text + "\n" +
+                "Controller [" + getBeanType().getName() + "]\n" +
+                "Method [" + getBridgedMethod().toGenericString() + "] " +
+                "with argument values:\n" + formattedArgs;
+    }
+
+
+    protected class HandlerMethodParameter extends MethodParameter {
+
+        private volatile Annotation[] combinedAnnotations;
+
+        public HandlerMethodParameter(int index) {
+            super(HandlerMethod.this.bridgedMethod, index);
+        }
+
+        protected HandlerMethodParameter(HandlerMethodParameter original) {
+            super(original);
+        }
+
+        @Override
+        public HandlerMethodParameter clone() {
+            return new HandlerMethodParameter(this);
+        }
+    }
+
 }

@@ -22,6 +22,14 @@ public class MethodParameter {
     }
 
 
+    public MethodParameter(MethodParameter original) {
+        Assert.notNull(original, "Original must not be null");
+        this.executable = original.executable;
+        this.parameterIndex = original.parameterIndex;
+        this.parameter = original.parameter;
+    }
+
+
     public Parameter getParameter() {
         if (this.parameterIndex < 0) {
             throw new IllegalStateException("Cannot retrieve Parameter descriptor for method return type");

@@ -74,11 +74,11 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
         RequestMappingInfo request;
         for(Method method : controllerInstance.getClass().getDeclaredMethods()) {
             //获取controller中所有带@RequestMapping的方法
-            if(!method.isAnnotationPresent(RequestMapping.class)) {
+            if (!AnnotatedElementUtils.hasAnnotation(method, RequestMapping.class)) {
                 return;
             }
 
-            RequestMapping requestMapping = method.getAnnotation(RequestMapping.class);
+            RequestMapping requestMapping = AnnotatedElementUtils.getAnnotation(method, RequestMapping.class);
             methodUri = requestMapping.value();
             requestMethod = RequestMethod.valueOf(requestMapping.method().name());
             //将适用的方法封装成请求体
