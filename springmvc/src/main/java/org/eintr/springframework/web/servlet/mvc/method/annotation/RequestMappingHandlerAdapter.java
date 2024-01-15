@@ -26,6 +26,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter {
                                                HandlerMethod handlerMethod) throws Exception {
 
         ServletInvocableHandlerMethod invocableMethod = createInvocableHandlerMethod(handlerMethod);
+        // FIXME 设计一个变量把 response 包起来
         invocableMethod.invokeAndHandle(request);
 
         return null;

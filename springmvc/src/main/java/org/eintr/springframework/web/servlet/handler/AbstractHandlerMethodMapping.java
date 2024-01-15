@@ -64,12 +64,13 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
         Object controllerInstance = (handler instanceof String ?
                 getApplicationContext().getBean((String) handler) : handler);
         //获取类上的@RequestMapping的value值
-        String classUri = null;
+        String[] classUris = null;
         if (controllerInstance.getClass().isAnnotationPresent(RequestMapping.class)){
-            classUri = controllerInstance.getClass().getDeclaredAnnotation(RequestMapping.class).value();
+            classUris = controllerInstance.getClass().getDeclaredAnnotation(RequestMapping.class).value();
         }
 
-        String methodUri;
+        // 获取方法上的 RequestMapping 包括 GetMapping 这些注解
+        String[] methodUris;
         RequestMethod requestMethod;
         RequestMappingInfo request;
         for(Method method : controllerInstance.getClass().getDeclaredMethods()) {
@@ -80,14 +81,21 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 
             RequestMapping requestMapping = AnnotationUtils.getMergeAnnotation(method, RequestMapping.class);
-            methodUri = requestMapping.value();
+            methodUris = requestMapping.value();
             requestMethod = RequestMethod.valueOf(requestMapping.method().name());
-            //将适用的方法封装成请求体
-            request = new RequestMappingInfo(
-                    joinFullUri(classUri, methodUri),
-                    requestMethod);
-
-            registerHandlerMethod(handler, method, (T) request);
+            for (String path : methodUris) {
+                if (classUris != null) {
+                    for (String classUri : classUris) {
+                        request = new RequestMappingInfo(
+                                joinFullUri(classUri, path), requestMethod);
+                        registerHandlerMethod(handler, method, (T) request);
+                    }
+                } else {
+                    request = new RequestMappingInfo(
+                            joinFullUri("", path), requestMethod);
+                    registerHandlerMethod(handler, method, (T) request);
+                }
+            }
         }
     }
 
