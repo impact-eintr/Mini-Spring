@@ -3,13 +3,12 @@ package org.eintr.springframework.web.method;
 import cn.hutool.core.lang.Assert;
 import org.eintr.springframework.beans.factory.BeanFactory;
 import org.eintr.springframework.core.MethodParameter;
+import org.eintr.springframework.http.HttpStatus;
 import org.eintr.springframework.util.ClassUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -39,6 +38,10 @@ public class HandlerMethod {
 
     // 桥接方法
     private final Method bridgedMethod;
+
+    private HttpStatus responseStatus;
+
+    private String responseStatusReason;
 
 
     public HandlerMethod(String beanName, BeanFactory beanFactory, Method method) {
@@ -78,6 +81,8 @@ public class HandlerMethod {
         this.method = handlerMethod.method;
         this.bridgedMethod = handlerMethod.method;
         this.parameters = initMethodParameters();
+        this.responseStatus = handlerMethod.responseStatus;
+        this.responseStatusReason = handlerMethod.responseStatusReason;
     }
 
     protected HandlerMethod(HandlerMethod handlerMethod) {
@@ -88,6 +93,8 @@ public class HandlerMethod {
         this.method = handlerMethod.method;
         this.bridgedMethod = handlerMethod.method;
         this.parameters = handlerMethod.parameters;
+        this.responseStatus = handlerMethod.responseStatus;
+        this.responseStatusReason = handlerMethod.responseStatusReason;
     }
 
     public Object getBean() {
@@ -100,6 +107,10 @@ public class HandlerMethod {
 
     public Class<?> getBeanType() {
         return beanType;
+    }
+
+    public BeanFactory getBeanFactory() {
+        return this.beanFactory;
     }
 
 
@@ -153,7 +164,19 @@ public class HandlerMethod {
                 "Method [" + getBridgedMethod().toGenericString() + "] " +
                 "with argument values:\n" + formattedArgs;
     }
+    protected HttpStatus getResponseStatus() {
+        return this.responseStatus;
+    }
 
+
+    protected String getResponseStatusReason() {
+        return this.responseStatusReason;
+    }
+
+
+    public MethodParameter getReturnValueType(Object returnValue) {
+        return new ReturnValueMethodParameter(returnValue);
+    }
 
     protected class HandlerMethodParameter extends MethodParameter {
 
@@ -170,6 +193,32 @@ public class HandlerMethod {
         @Override
         public HandlerMethodParameter clone() {
             return new HandlerMethodParameter(this);
+        }
+    }
+
+
+    private class ReturnValueMethodParameter extends HandlerMethodParameter {
+
+        private final Object returnValue;
+
+        public ReturnValueMethodParameter(Object returnValue) {
+            super(-1);
+            this.returnValue = returnValue;
+        }
+
+        protected ReturnValueMethodParameter(ReturnValueMethodParameter original) {
+            super(original);
+            this.returnValue = original.returnValue;
+        }
+
+        @Override
+        public Class<?> getParameterType() {
+            return (this.returnValue != null ? this.returnValue.getClass() : super.getParameterType());
+        }
+
+        @Override
+        public ReturnValueMethodParameter clone() {
+            return new ReturnValueMethodParameter(this);
         }
     }
 

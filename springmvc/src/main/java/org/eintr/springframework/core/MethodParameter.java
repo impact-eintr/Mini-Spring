@@ -14,6 +14,8 @@ public class MethodParameter {
 
     private volatile Parameter parameter;
 
+    private volatile Class<?> parameterType;
+
 
     public MethodParameter(Method method, int parameterIndex) {
         Assert.notNull(method, "Method must not be null");
@@ -27,6 +29,7 @@ public class MethodParameter {
         this.executable = original.executable;
         this.parameterIndex = original.parameterIndex;
         this.parameter = original.parameter;
+        this.parameterType = original.parameterType;
     }
 
 
@@ -52,6 +55,27 @@ public class MethodParameter {
 
     public int getParameterIndex() {
         return this.parameterIndex;
+    }
+
+
+    void setParameterType(Class<?> parameterType) {
+        this.parameterType = parameterType;
+    }
+
+
+    public Class<?> getParameterType() {
+        Class<?> paramType = this.parameterType;
+        if (paramType != null) {
+            return paramType;
+        }
+        //if (getContainingClass() != getDeclaringClass()) {
+        //    paramType = ResolvableType.forMethodParameter(this, null, 1).resolve();
+        //}
+        //if (paramType == null) {
+        //    paramType = computeParameterType();
+        //}
+        this.parameterType = paramType;
+        return paramType;
     }
 
     private static int validateIndex(Executable executable, int parameterIndex) {
