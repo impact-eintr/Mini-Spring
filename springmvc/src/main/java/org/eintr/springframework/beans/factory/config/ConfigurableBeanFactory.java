@@ -13,7 +13,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	void addBeanPostProcessor(BeanPostProcessor beanPostProcessor);
 	void destroySingletons();
 	void addEmbeddedValueResolver(StringValueResolver valueResolver);
-	String resolveEmbeddedValueResolver(String value);
+	String resolveEmbeddedValue(String value);
 
 	void setConversionService(ConversionService conversionService);
 

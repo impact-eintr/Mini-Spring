@@ -8,8 +8,7 @@
     <context:component-scan base-package="org.eintr.springframework.test.web"/>
     <bean id="/api/hrm" class="org.eintr.springframework.test.web.HttpRequestHandlerImpl"/>
 
-    <bean id="jsonReturnValueHandler" class="org.eintr.springframework.test.web.DefaultJsonReturnValueHandler"/>
-    <bean id="argumentHandler" class="org.eintr.springframework.test.web.DefaultArgumentHandler"/>
+    <bean id="jsonReturnValueHandler" class="org.eintr.springframework.web.method.annotation.DefaultJsonReturnValueHandler"/>
 <!--
     <bean id="controllerImpl" class="org.eintr.springframework.test.web.ControllerImpl"/>
     <bean id="controllerOtherImpl" class="org.eintr.springframework.test.web.ControllerOtherImpl"/>

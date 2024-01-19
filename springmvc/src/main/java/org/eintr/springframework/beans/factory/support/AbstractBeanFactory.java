@@ -77,7 +77,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	}
 
 	@Override
-	public String resolveEmbeddedValueResolver(String value) {
+	public String resolveEmbeddedValue(String value) {
 		String result = value;
 		for (StringValueResolver resolver : this.embeddedValueResolvers) {
 			result = resolver.resolveStringValue(result);

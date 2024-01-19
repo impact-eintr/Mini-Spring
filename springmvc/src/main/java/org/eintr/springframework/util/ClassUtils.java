@@ -3,6 +3,7 @@ package org.eintr.springframework.util;
 import cn.hutool.core.lang.Assert;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Modifier;
 
 public class ClassUtils {
 
@@ -123,5 +124,10 @@ public class ClassUtils {
             }
         }
         return clazz;
+    }
+
+
+    public static boolean isInnerClass(Class<?> clazz) {
+        return (clazz.isMemberClass() && !Modifier.isStatic(clazz.getModifiers()));
     }
 }

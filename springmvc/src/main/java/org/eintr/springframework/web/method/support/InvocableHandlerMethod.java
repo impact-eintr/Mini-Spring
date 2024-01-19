@@ -132,6 +132,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
         }
     }
 
-
-
+    public void setHandlerMethodArgumentResolvers(
+            HandlerMethodArgumentResolverComposite argumentResolvers) {
+        this.resolvers = argumentResolvers;
+    }
 }

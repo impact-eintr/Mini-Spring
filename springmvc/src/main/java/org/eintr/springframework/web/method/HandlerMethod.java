@@ -29,6 +29,7 @@ public class HandlerMethod {
 
     //FIXMW 增加汉书调用参数
 
+    // 方法参数列表
     private final MethodParameter[] parameters;
 
     /**
@@ -202,7 +203,7 @@ public class HandlerMethod {
         private final Object returnValue;
 
         public ReturnValueMethodParameter(Object returnValue) {
-            super(-1);
+            super(-1); // 表示这是一个返回值
             this.returnValue = returnValue;
         }
 

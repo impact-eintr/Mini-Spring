@@ -1,28 +1,22 @@
 package org.eintr.springframework.web.servlet.mvc.method.annotation;
 
 import cn.hutool.core.lang.Assert;
-import org.eintr.springframework.beans.factory.ListableBeanFactory;
 import org.eintr.springframework.http.HttpStatus;
-import org.eintr.springframework.util.BeanFactoryUtils;
 import org.eintr.springframework.util.StringUtils;
 import org.eintr.springframework.web.context.request.ServletWebRequest;
 import org.eintr.springframework.web.method.HandlerMethod;
-import org.eintr.springframework.web.method.support.HandlerMethodReturnValueHandler;
+import org.eintr.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
 import org.eintr.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite;
 import org.eintr.springframework.web.method.support.InvocableHandlerMethod;
-import org.eintr.springframework.web.servlet.HandlerAdapter;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 
 public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 
     private HandlerMethodReturnValueHandlerComposite returnValueHandlers;
+
 
     /**
      * Creates an instance from the given handler and method.
@@ -63,7 +57,6 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
         } catch (Exception ex) {
             throw ex;
         }
-
     }
 
 
@@ -85,8 +78,12 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
         }
     }
 
-        public void setHandlerMethodReturnValueHandlers(
-                HandlerMethodReturnValueHandlerComposite returnValueHandlers) {
+
+
+
+
+    public void setHandlerMethodReturnValueHandlers(
+            HandlerMethodReturnValueHandlerComposite returnValueHandlers) {
         this.returnValueHandlers = returnValueHandlers;
     }
 }

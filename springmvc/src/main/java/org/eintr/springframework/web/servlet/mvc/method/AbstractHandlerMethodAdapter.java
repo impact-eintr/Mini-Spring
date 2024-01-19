@@ -1,6 +1,5 @@
 package org.eintr.springframework.web.servlet.mvc.method;
 
-import org.eintr.springframework.web.context.request.ServletWebRequest;
 import org.eintr.springframework.web.method.HandlerMethod;
 import org.eintr.springframework.web.servlet.HandlerAdapter;
 import org.eintr.springframework.web.servlet.ModelAndView;

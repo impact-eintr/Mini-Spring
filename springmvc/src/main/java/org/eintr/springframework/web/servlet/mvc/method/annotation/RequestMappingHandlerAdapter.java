@@ -1,11 +1,11 @@
 package org.eintr.springframework.web.servlet.mvc.method.annotation;
 
-import org.eintr.springframework.beans.BeansException;
 import org.eintr.springframework.beans.factory.BeanFactory;
 import org.eintr.springframework.beans.factory.BeanFactoryAware;
 import org.eintr.springframework.beans.factory.InitializingBean;
 import org.eintr.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.eintr.springframework.test.web.DefaultArgumentHandler;
+import org.eintr.springframework.web.method.annotation.DefaultJsonReturnValueHandler;
+import org.eintr.springframework.web.method.annotation.RequestParamMethodArgumentResolver;
 import org.eintr.springframework.web.context.request.ServletWebRequest;
 import org.eintr.springframework.web.method.HandlerMethod;
 import org.eintr.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -28,6 +28,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
     private List<HandlerMethodReturnValueHandler> customReturnValueHandlers;
 
+    private List<HandlerMethodArgumentResolver> customArgumentResolvers;
+
     private ConfigurableBeanFactory beanFactory;
 
 
@@ -35,6 +37,9 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
         return this.customReturnValueHandlers;
     }
 
+    public List<HandlerMethodArgumentResolver> getCustomArgumentResolvers() {
+        return this.customArgumentResolvers;
+    }
 
     public void setCustomReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
         this.customReturnValueHandlers = returnValueHandlers;
@@ -76,6 +81,10 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
         ServletWebRequest webRequest = new ServletWebRequest(request, response);
         ServletInvocableHandlerMethod invocableMethod = createInvocableHandlerMethod(handlerMethod);
+        // 设置参数解析类
+        if (this.argumentResolvers != null) {
+            invocableMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
+        }
         // 设置返回值解析类
         if (this.returnValueHandlers != null) {
             invocableMethod.setHandlerMethodReturnValueHandlers(this.returnValueHandlers);
@@ -149,17 +158,18 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
         resolvers.add(new SessionStatusMethodArgumentResolver());
         resolvers.add(new UriComponentsBuilderMethodArgumentResolver());
 
-        // Custom arguments
-        if (getCustomArgumentResolvers() != null) {
-            resolvers.addAll(getCustomArgumentResolvers());
-        }
+
 
         // Catch-all
         resolvers.add(new RequestParamMethodArgumentResolver(getBeanFactory(), true));
         resolvers.add(new ServletModelAttributeMethodProcessor(true));
         */
 
-        resolvers.add(new DefaultArgumentHandler(getBeanFactory()));
+        resolvers.add(new RequestParamMethodArgumentResolver(this.beanFactory));
+        // Custom arguments
+        if (getCustomArgumentResolvers() != null) {
+            resolvers.addAll(getCustomArgumentResolvers());
+        }
         return resolvers;
     }
 
@@ -191,10 +201,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		handlers.add(new ViewNameMethodReturnValueHandler());
 		handlers.add(new MapMethodProcessor());
 
-		// Custom return value types
-		if (getCustomReturnValueHandlers() != null) {
-			handlers.addAll(getCustomReturnValueHandlers());
-		}
+
 
 		// Catch-all
 		if (!CollectionUtils.isEmpty(getModelAndViewResolvers())) {
@@ -204,7 +211,11 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			handlers.add(new ModelAttributeMethodProcessor(true));
 		}
 		*/
-        handlers.add(new DefaultMethodReturnValueHandler());
+        handlers.add(new DefaultJsonReturnValueHandler());
+        // Custom return value types
+        if (getCustomReturnValueHandlers() != null) {
+            handlers.addAll(getCustomReturnValueHandlers());
+        }
 		return handlers;
 	}
 }
