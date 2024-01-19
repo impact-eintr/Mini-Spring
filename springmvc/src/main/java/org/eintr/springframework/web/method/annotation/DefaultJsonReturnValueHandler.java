@@ -23,7 +23,7 @@ public class DefaultJsonReturnValueHandler implements HandlerMethodReturnValueHa
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("demo", returnValue);
-        ow.write("这是测试 DefaultJsonReturnValueHandler"+jsonObject.toJSONString());
+        ow.write(jsonObject.toJSONString());
         ow.flush();
         ow.close();
     }
