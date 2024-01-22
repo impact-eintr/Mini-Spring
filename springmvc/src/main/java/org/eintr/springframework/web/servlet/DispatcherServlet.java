@@ -239,6 +239,15 @@ public class DispatcherServlet extends FrameworkServlet {
 
     // 初始化 HandlerExceptionResolvers
     public void initHandlerExceptionResolvers(ApplicationContext context) {
+        this.handlerExceptionResolvers = null;
+        Map<String, HandlerExceptionResolver> matchBeans =
+                BeanFactoryUtils.beansOfTypeIncludingAncestors(context, HandlerExceptionResolver.class);
+        if (!matchBeans.isEmpty()) {
+            this.handlerExceptionResolvers = new ArrayList<>(matchBeans.values());
+        }
+        if (this.handlerExceptionResolvers == null) {
+            this.handlerExceptionResolvers = getDefaultStrategies(context, HandlerExceptionResolver.class);
+        }
     }
 
     // 初始化 RequestToViewNameTranslator
@@ -364,7 +373,10 @@ public class DispatcherServlet extends FrameworkServlet {
 
             } catch (Exception ex) {
                 dispatchException = ex;
+            } catch (Throwable err) {
+                dispatchException = new ServletException(err);
             }
+            processDispatchResult(processedRequest, response, mappedHandler, dispatchException);
         } catch (Exception ex) {
             ex.printStackTrace();
         } catch (Throwable ex) {
@@ -375,6 +387,34 @@ public class DispatcherServlet extends FrameworkServlet {
 
     }
 
+
+    public void processDispatchResult(HttpServletRequest processedRequest,
+                                      HttpServletResponse response,
+                                      HandlerExecutionChain mappedHandler,
+                                      Exception dispatchException) throws Exception {
+        if (dispatchException != null) {
+            Object handler = (mappedHandler != null ? mappedHandler.getHandler() : null);
+            processHandlerException(processedRequest, response, handler, dispatchException);
+        }
+    }
+
+
+    protected ModelAndView processHandlerException(HttpServletRequest request, HttpServletResponse response,
+                                                   Object handler, Exception ex) throws Exception {
+
+        // 移除属性
+        // Success and error responses may use different content types
+        request.removeAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
+
+        // Check registered HandlerExceptionResolvers...
+        if (this.handlerExceptionResolvers != null) {
+            // HandlerExceptionResolver 列表循环处理
+            for (HandlerExceptionResolver resolver : this.handlerExceptionResolvers) {
+                resolver.resolveException(request, response, handler, ex);
+            }
+        }
+        throw ex;
+    }
 
     protected HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
         if (this.handlerMappings != null) {

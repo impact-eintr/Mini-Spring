@@ -7,8 +7,11 @@ import org.eintr.springframework.annotation.stereotype.Controller;
 public class WebService {
 
     @PostMapping("/api/User")
-    public Object User(@RequestParam(value="data") String data) {
-        return data;
+    public Object User(@RequestParam(value="data") String data) throws Exception {
+        if ("123".equals(data)) {
+            return data;
+        }
+        throw new Exception("Exception Test");
     }
 
 }

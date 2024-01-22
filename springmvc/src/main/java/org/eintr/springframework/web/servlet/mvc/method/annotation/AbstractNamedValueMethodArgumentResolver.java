@@ -1,4 +1,4 @@
-package org.eintr.springframework.web.method.annotation;
+package org.eintr.springframework.web.servlet.mvc.method.annotation;
 
 import org.eintr.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.eintr.springframework.core.MethodParameter;

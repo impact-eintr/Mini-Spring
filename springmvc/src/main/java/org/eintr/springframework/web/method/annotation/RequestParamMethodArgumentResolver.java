@@ -4,6 +4,7 @@ import org.eintr.springframework.annotation.mvc.RequestParam;
 import org.eintr.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.eintr.springframework.core.MethodParameter;
 import org.eintr.springframework.web.context.request.ServletWebRequest;
+import org.eintr.springframework.web.servlet.mvc.method.annotation.AbstractNamedValueMethodArgumentResolver;
 import org.eintr.springframework.web.servlet.mvc.method.annotation.ValueConstants;
 
 import javax.servlet.http.HttpServletRequest;
